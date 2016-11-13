@@ -6,9 +6,10 @@
  */
 
 #include <iostream>
-#include "Text.h"
+#include "../include/Text.h"
 
 int main(){
 	Text t("Hello Crypto!");
 	std::cout << "IC: " << t.ic() << std::endl;
+	//this 
 }

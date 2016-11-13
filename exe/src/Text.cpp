@@ -5,7 +5,7 @@
  *      Author: rag
  */
 
-#include "Text.h"
+#include "../include/Text.h"
 #include <cctype>
 
 using namespace std;

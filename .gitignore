@@ -1,3 +1,7 @@
+Debug
+Release
+Test
+
 
 # Created by https://www.gitignore.io/api/windows
 
@@ -129,3 +133,5 @@ local.properties
 
 # Code Recommenders
 .recommenders/
+.idea/
+build/
