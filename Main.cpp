@@ -11,5 +11,6 @@
 int main(){
 	Text t("Hello Crypto!");
 	std::cout << "IC: " << t.ic() << std::endl;
+	std::cout << "THIS IS WHAT I WANTED!!!" << std::endl;
 	//this 
 }

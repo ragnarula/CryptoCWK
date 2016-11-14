@@ -18,12 +18,11 @@ Text::Text(std::string& data) : content(data) {
 }
 
 Text::~Text() {
-	// TODO Auto-generated destructor stub
 }
 
 void Text::buildLetterFrequencyDistribution() {
 	for(auto i = content.begin(); i != content.end(); i++){
-		//if the letter is no part of the alpabet then continue to the next one
+		//if the letter is not part of the alphabet then continue to the next one
 		if(!isalpha(*i)){
 			continue;
 		}
@@ -39,7 +38,6 @@ void Text::buildLetterFrequencyDistribution() {
 		} else {
 			freq.insert(pair<char, int>(*i, 1));
 		}
-
 	}
 }
 
@@ -71,6 +69,41 @@ double Text::ic() {
 	return sum/divisor;
 }
 
-std::vector<Text> Text::goupBy(int num) {
-	return vector<Text>();
+std::vector<Text> Text::groupTo(const int num) {
+
+    vector<Text> groups;
+
+    for(size_t i = 0; i < num; i++){
+        string s;
+        for(size_t j = 0; j < content.size(); j++){
+            if(j % num == i){
+                s.push_back(content[j]);
+            }
+        }
+        groups.push_back(Text(s));
+    }
+
+	return groups;
+}
+
+bool Text::operator==(const Text &other) {
+    if(&other == this){
+        return true;
+    }
+
+    return content == other.content;
+}
+
+void Text::shift() {
+    for(size_t i = 0; i < content.length(); i++){
+        content[i] += 1;
+        if(content[i] > 'z'){
+            content[i] = 'a';
+        }
+    }
+}
+
+std::ostream &operator<<(std::ostream &os, const Text &t) {
+    os << "Text(" << t.content << ")";
+    return os;
 }
