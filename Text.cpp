@@ -5,8 +5,7 @@
  *      Author: rag
  */
 
-#include "../include/Text.h"
-#include <cctype>
+#include "Text.h"
 
 using namespace std;
 
@@ -72,6 +71,6 @@ double Text::ic() {
 	return sum/divisor;
 }
 
-std::vector<Text> Text::goupBy(int int1) {
+std::vector<Text> Text::goupBy(int num) {
 	return vector<Text>();
 }

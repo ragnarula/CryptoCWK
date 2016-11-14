@@ -6,7 +6,7 @@
  */
 
 #include <iostream>
-#include "../include/Text.h"
+#include "Text.h"
 
 int main(){
 	Text t("Hello Crypto!");
