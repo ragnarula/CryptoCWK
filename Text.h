@@ -23,11 +23,12 @@ public:
 	Text(const char *);
 	Text(std::string&);
 	virtual ~Text();
-	double ic();
-	std::vector<Text> groupTo(const int);
+	double ic() const;
+	std::vector<Text> groupTo(const int) const;
 
     void shift();
-	bool operator==(const Text& other);
+	void shiftBy(size_t);
+	bool operator==(const Text& other) const;
     friend std::ostream& operator<<(std::ostream& os, const Text& t);
 };
 

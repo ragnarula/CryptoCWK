@@ -41,7 +41,7 @@ void Text::buildLetterFrequencyDistribution() {
 	}
 }
 
-double Text::ic() {
+double Text::ic() const {
 	//if there is no content return 0.0 otherwise will get a division by 0
 	if(content.size() < 1){
 		return 0.0;
@@ -69,7 +69,7 @@ double Text::ic() {
 	return sum/divisor;
 }
 
-std::vector<Text> Text::groupTo(const int num) {
+std::vector<Text> Text::groupTo(const int num) const {
 
     vector<Text> groups;
 
@@ -86,7 +86,7 @@ std::vector<Text> Text::groupTo(const int num) {
 	return groups;
 }
 
-bool Text::operator==(const Text &other) {
+bool Text::operator==(const Text &other) const {
     if(&other == this){
         return true;
     }
@@ -106,4 +106,10 @@ void Text::shift() {
 std::ostream &operator<<(std::ostream &os, const Text &t) {
     os << "Text(" << t.content << ")";
     return os;
+}
+
+void Text::shiftBy(size_t n) {
+	for(size_t i = 0; i < n; i ++){
+		shift();
+	}
 }
