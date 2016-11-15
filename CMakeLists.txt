@@ -4,8 +4,8 @@ project(CryptoCoursework)
 set (CMAKE_CXX_STANDARD 11)
 enable_testing()
 
-add_executable(app Main.cpp Text.cpp)
-add_executable(testapp MainTest.cpp Text.cpp TextTests.cpp)
-add_executable(shift Text.cpp MainShift.cpp)
+add_executable(decrypt MainDecrypt.cpp Text.cpp Arg.cpp Arg.h)
+add_executable(testapp MainTest.cpp Text.cpp TextTests.cpp Arg.cpp Arg.h)
+add_executable(shift Text.cpp MainShift.cpp Arg.cpp Arg.h)
 
 add_test(CatchTests testapp)
