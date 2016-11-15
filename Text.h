@@ -12,11 +12,12 @@
 #include <vector>
 #include <map>
 #include <iostream>
+#include <string>
 
 class Text {
 	std::string content;
 	std::map<char, int> freq;
-	void buildLetterFrequencyDistribution();
+	void buildLetterFrequencyDistribution(const std::string&);
 
 public:
 
@@ -26,8 +27,9 @@ public:
 	double ic() const;
 	std::vector<Text> groupTo(const int) const;
 
-    void shift();
-	void shiftBy(size_t);
+    void shiftForwards();
+    void shiftBackwards();
+	void shiftBy(int);
 	bool operator==(const Text& other) const;
     friend std::ostream& operator<<(std::ostream& os, const Text& t);
 };

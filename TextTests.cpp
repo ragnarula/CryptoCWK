@@ -56,25 +56,48 @@ TEST_CASE("group by should return the correct number of texts in vector with the
     REQUIRE(groups[4] == r4);
 }
 
-TEST_CASE("Shift increments characters"){
+TEST_CASE("ShiftForwards increments characters"){
     //given a text
     Text t("abcde");
 
     //when shifted should move letters by one
-    t.shift();
+    t.shiftForwards();
     REQUIRE(t == Text("bcdef"));
-    t.shift();
+    t.shiftForwards();
     REQUIRE(t == Text("cdefg"));
-    t.shift();
+    t.shiftForwards();
     REQUIRE(t == Text("defgh"));
-    t.shift();
+    t.shiftForwards();
     REQUIRE(t == Text("efghi"));
-    t.shift();
+    t.shiftForwards();
     REQUIRE(t == Text("fghij"));
-    t.shift();
+    t.shiftForwards();
     REQUIRE(t == Text("ghijk"));
 
     t = Text("abz");
-    t.shift();
+    t.shiftForwards();
     REQUIRE(t == Text("bca"));
+}
+
+TEST_CASE("ShiftBackwards decrements characters"){
+    //given a text
+    Text t("ghijk");
+
+    //when shifted should move letters by one
+    t.shiftBackwards();
+    REQUIRE(t == Text("fghij"));
+    t.shiftBackwards();
+    REQUIRE(t == Text("efghi"));
+    t.shiftBackwards();
+    REQUIRE(t == Text("defgh"));
+    t.shiftBackwards();
+    REQUIRE(t == Text("cdefg"));
+    t.shiftBackwards();
+    REQUIRE(t == Text("bcdef"));
+    t.shiftBackwards();
+    REQUIRE(t == Text("abcde"));
+
+    t = Text("abz");
+    t.shiftBackwards();
+    REQUIRE(t == Text("zay"));
 }

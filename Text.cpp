@@ -5,39 +5,41 @@
  *      Author: rag
  */
 
+#include <cstdlib>
 #include "Text.h"
 
 using namespace std;
 
-Text::Text(const char* data) : content(data) {
-	buildLetterFrequencyDistribution();
+Text::Text(const char* data) {
+	buildLetterFrequencyDistribution(data);
 }
 
-Text::Text(std::string& data) : content(data) {
-	buildLetterFrequencyDistribution();
+Text::Text(std::string &s) {
+    buildLetterFrequencyDistribution(s);
 }
 
 Text::~Text() {
 }
 
-void Text::buildLetterFrequencyDistribution() {
-	for(auto i = content.begin(); i != content.end(); i++){
+void Text::buildLetterFrequencyDistribution(const string &s) {
+	for(auto i = s.begin(); i != s.end(); i++){
 		//if the letter is not part of the alphabet then continue to the next one
 		if(!isalpha(*i)){
 			continue;
 		}
 
-		//lowercase all letters, mutating content
-		*i = tolower(*i);
+		//lowercase all letters
+		char c = tolower(*i);
 
-
-		auto k = freq.find(*i);
+		auto k = freq.find(c);
 		//if exists in map, incrememnt count, else add 1
 		if(k != freq.end()){
 			k->second++;
 		} else {
-			freq.insert(pair<char, int>(*i, 1));
+			freq.insert(pair<char, int>(c, 1));
 		}
+
+        content.push_back(c);
 	}
 }
 
@@ -94,7 +96,7 @@ bool Text::operator==(const Text &other) const {
     return content == other.content;
 }
 
-void Text::shift() {
+void Text::shiftForwards() {
     for(size_t i = 0; i < content.length(); i++){
         content[i] += 1;
         if(content[i] > 'z'){
@@ -104,12 +106,30 @@ void Text::shift() {
 }
 
 std::ostream &operator<<(std::ostream &os, const Text &t) {
-    os << "Text(" << t.content << ")";
+    os << t.content;
     return os;
 }
 
-void Text::shiftBy(size_t n) {
-	for(size_t i = 0; i < n; i ++){
-		shift();
+void Text::shiftBy(int n) {
+	if(n > 0){
+		for(size_t i = 0; i < n; i++){
+			shiftForwards();
+		}
+	} else {
+		for(size_t i = 0; i < abs(n); i++){
+			shiftBackwards();
+		}
+	}
+
+}
+
+void Text::shiftBackwards() {
+	for(size_t i = 0; i < content.length(); i++){
+		content[i] -= 1;
+		if(content[i] < 'a'){
+			content[i] = 'z';
+		}
 	}
 }
+
+
