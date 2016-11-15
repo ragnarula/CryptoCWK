@@ -10,6 +10,26 @@
 
 using namespace std;
 
+//top few english trigrams
+const vector<string> Text::trigrams = {
+        "the",
+        "and",
+        "tha",
+        "ent",
+        "ing",
+        "ion",
+        "tio",
+        "for",
+        "nde",
+        "has",
+        "nce",
+        "edt",
+        "tis",
+        "oft",
+        "sth",
+        "men"
+};
+
 Text::Text(const char* data) {
 	buildLetterFrequencyDistribution(data);
 }
@@ -97,12 +117,7 @@ bool Text::operator==(const Text &other) const {
 }
 
 void Text::shiftForwards() {
-    for(size_t i = 0; i < content.length(); i++){
-        content[i] += 1;
-        if(content[i] > 'z'){
-            content[i] = 'a';
-        }
-    }
+    shiftBy(1);
 }
 
 std::ostream &operator<<(std::ostream &os, const Text &t) {
@@ -111,25 +126,40 @@ std::ostream &operator<<(std::ostream &os, const Text &t) {
 }
 
 void Text::shiftBy(int n) {
-	if(n > 0){
-		for(size_t i = 0; i < n; i++){
-			shiftForwards();
-		}
-	} else {
-		for(size_t i = 0; i < abs(n); i++){
-			shiftBackwards();
-		}
-	}
-
+    for(size_t i = 0; i < content.length(); i++){
+        int tmp = content[i] - 'a';
+        tmp = ((tmp + n) % 26 + 26) % 26; //avoid negative remainders
+        content[i] = tmp + 'a';
+    }
 }
 
 void Text::shiftBackwards() {
-	for(size_t i = 0; i < content.length(); i++){
-		content[i] -= 1;
-		if(content[i] < 'a'){
-			content[i] = 'z';
-		}
-	}
+    shiftBy(-1);
+}
+
+size_t Text::englishTrigramCount() {
+    size_t sum = 0;
+
+    for(size_t i = 0; i < trigrams.size(); i++){
+        size_t pos = 0;
+        while(pos != string::npos){
+            pos = content.find(trigrams[i], pos);
+            if(pos != string::npos){
+                sum++;
+                pos++;
+            }
+        }
+    }
+
+    return sum;
+}
+
+void Text::multiply(int n) {
+    for(size_t i = 0; i < content.size(); i++){
+        int tmp = content[i] - 'a';
+        tmp = ((tmp * n) % 26 + 26) % 26; //avoid negative remainders
+        content[i] = tmp + 'a';
+    }
 }
 
 

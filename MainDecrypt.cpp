@@ -8,7 +8,7 @@
 #include <iostream>
 #include "Text.h"
 #include "optionparser.h"
-#include "Arg.h"
+#include "Helper.h"
 #include <fstream>
 #include <sstream>
 #include <cmath>
@@ -23,8 +23,8 @@ const option::Descriptor usage[] =
                 {UNKNOWN, 0, "",  "",     option::Arg::None, "USAGE: decrypt -i input_file -o output_file\n\n"
                                                                      "Options: "},
                 {HELP,    0, "",  "help", option::Arg::None, "  --help                  \tPrint usage and exit."},
-                {INPUT,   0, "i", "in",   Arg::Required,     "  -i, --in input_file     \tFilename of cipher text. [REQUIRED]"},
-                {OUTPUT,  0, "o", "out",  Arg::Required,     "  -o, --out output_file   \tFilename where decrypted plain text should be stored. [REQUIRED]"},
+                {INPUT,   0, "i", "in",   Helper::Required,     "  -i, --in input_file     \t[REQUIRED] Filename of cipher text."},
+                {OUTPUT,  0, "o", "out",  Helper::Required,     "  -o, --out output_file   \t[REQUIRED] Filename where decrypted plain text should be stored."},
                 {0,       0, 0,   0,      0,                 0}
         };
 
@@ -66,7 +66,21 @@ int main(int argc, char *argv[]) {
     if(fabs(cipherText.ic() - 1.73) < 0.1){
         std::cout << "Cipher text index of coincidence: " << cipherText.ic() << std::endl;
         std::cout << "Suspecting mono-alphabetic cipher." << std::endl;
+
+        Text plainText = cipherText;
+        size_t maxShift = 0;
+        size_t maxCount = plainText.englishTrigramCount();
+
+        for(size_t i = 1; i <= 26; i++) {
+            plainText.shiftForwards();
+            size_t count = plainText.englishTrigramCount();
+            if (count > maxCount) {
+                maxShift = i;
+                maxCount = count;
+            }
+            std::cout << "Shift: " << i << " Trigrams: " << count << std::endl;
+        }
+        std::cout << "Decryption Success!\nShift cipher key: " << maxShift << std::endl;
+        return 0;
     }
-
-
 }

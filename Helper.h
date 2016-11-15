@@ -8,9 +8,10 @@
 
 #include "optionparser.h"
 
-class Arg {
+class Helper {
 public:
     static option::ArgStatus Required(const option::Option& option, bool msg);
+    static int gcd(int, int);
 };
 
 

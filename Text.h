@@ -15,6 +15,9 @@
 #include <string>
 
 class Text {
+
+    static const std::vector<std::string> trigrams;
+
 	std::string content;
 	std::map<char, int> freq;
 	void buildLetterFrequencyDistribution(const std::string&);
@@ -30,8 +33,13 @@ public:
     void shiftForwards();
     void shiftBackwards();
 	void shiftBy(int);
+
+    size_t englishTrigramCount();
+
 	bool operator==(const Text& other) const;
     friend std::ostream& operator<<(std::ostream& os, const Text& t);
+
+    void multiply(int i);
 };
 
 #endif /* TEXT_H_ */

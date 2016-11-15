@@ -13,18 +13,19 @@
 
 
 enum optionIndex {
-    UNKNOWN, HELP, KEY, INPUT, OUTPUT
+    UNKNOWN, HELP, KEY_A, KEY_B, INPUT, OUTPUT
 };
 
 const option::Descriptor usage[] =
         {
-                {UNKNOWN,     0, "",  "",      option::Arg::None, "USAGE: shift -k key -i input_file -o output_file\n\n"
-                                                                          "Options: "},
-                {HELP,        0, "",  "help",  option::Arg::None, "  --help \tPrint usage and exit."},
-                {KEY, 0, "k", "count", Helper::Required,     "  -k, --key key \t[REQUIRED] The number of letters to shift each plain text character by. "},
-                {INPUT,       0, "i", "in",    Helper::Required,     "  -i, --in input_file \t[REQUIRED] Filename of plain text."},
-                {OUTPUT,      0, "o", "out",   Helper::Required,     "  -o, --out output_file \t[REQUIRED] Filename where cipher text should be stored."},
-                {0,           0, 0,   0,       0,                 0}
+                {UNKNOWN, 0, "",  "",      option::Arg::None, "USAGE: shift -a multiplier -b shift -i input_file -o output_file\n\n"
+                                                                      "Options: "},
+                {HELP,    0, "",  "help",  option::Arg::None, "  --help \tPrint usage and exit."},
+                {KEY_A,   0, "a", "key-a", Helper::Required,     "  -a, --key-a a_value \t[REQUIRED] The multiplier for the affine cipher. "},
+                {KEY_B,   0, "b", "key-b", Helper::Required,     "  -b, --key-b a_value \t[REQUIRED] The shift for the affine cipher. "},
+                {INPUT,   0, "i", "in",    Helper::Required,     "  -i, --in input_file \t[REQUIRED] Filename of plain text."},
+                {OUTPUT,  0, "o", "out",   Helper::Required,     "  -o, --out output_file \t[REQUIRED] Filename where cipher text should be stored."},
+                {0,       0, 0,   0,       0,                 0}
         };
 
 int main(int argc, char *argv[]) {
@@ -43,9 +44,14 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    if (options[KEY] == NULL || options[INPUT] == NULL || options[OUTPUT] == NULL) {
+    if (options[KEY_A] == NULL || options[KEY_B] == NULL || options[INPUT] == NULL || options[OUTPUT] == NULL) {
         option::printUsage(std::cerr, usage);
         return 1;
+    }
+
+    int multiplier = std::atoi(options[KEY_A].arg);
+    if(Helper::gcd(multiplier, 26) != 1){
+        std::cerr << "Multiplier must be relatively prime to 26, but gcd was: " << Helper::gcd(multiplier, 26) << std::endl;
     }
 
     //read input
@@ -62,8 +68,10 @@ int main(int argc, char *argv[]) {
     Text plainText(str);
 
     //shift
-    int shift = std::atoi(options[KEY].arg);
+    int shift = std::atoi(options[KEY_B].arg);
+
     Text cipherText = plainText;
+    cipherText.multiply(multiplier);
     cipherText.shiftBy(shift);
 
     //write output

@@ -101,3 +101,23 @@ TEST_CASE("ShiftBackwards decrements characters"){
     t.shiftBackwards();
     REQUIRE(t == Text("zay"));
 }
+
+TEST_CASE("English trigrams are counted correctly"){
+    //given a text with 5 common trigrams
+    Text t("thehasionfornce");
+
+    //should have a trigram count of 5
+    REQUIRE(t.englishTrigramCount() == 5);
+}
+
+TEST_CASE("Multiply does modulo multiplication of content"){
+    //given a text
+    Text t("abcz");
+
+    //when multiplied by 3
+    t.multiply(3);
+
+    //result should be
+    Text r("adgx");
+    REQUIRE(t == r);
+}
