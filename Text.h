@@ -18,9 +18,8 @@ class Text {
 
     static const std::vector<std::string> trigrams;
 
+    std::map<char, size_t > countLetters() const;
 	std::string content;
-	std::map<char, int> freq;
-	void buildLetterFrequencyDistribution(const std::string&);
 
 public:
 
@@ -32,8 +31,8 @@ public:
 
     void shiftForwards();
     void shiftBackwards();
-	void shiftBy(int);
 
+    std::multimap<size_t, char> getLetterFrequencies() const;
     size_t englishTrigramCount();
 
 	bool operator==(const Text& other) const;

@@ -30,37 +30,27 @@ const vector<string> Text::trigrams = {
         "men"
 };
 
-Text::Text(const char* data) {
-	buildLetterFrequencyDistribution(data);
+Text::Text(const char* data) : content(data) {
+
 }
 
-Text::Text(std::string &s) {
-    buildLetterFrequencyDistribution(s);
+Text::Text(std::string &s) : content(s){
+
 }
 
 Text::~Text() {
 }
 
-void Text::buildLetterFrequencyDistribution(const string &s) {
-	for(auto i = s.begin(); i != s.end(); i++){
-		//if the letter is not part of the alphabet then continue to the next one
-		if(!isalpha(*i)){
-			continue;
-		}
+multimap<size_t, char> Text::getLetterFrequencies() const {
 
-		//lowercase all letters
-		char c = tolower(*i);
+    map<char, size_t > counts = countLetters();
+    multimap<size_t, char> sortedCounts;
 
-		auto k = freq.find(c);
-		//if exists in map, incrememnt count, else add 1
-		if(k != freq.end()){
-			k->second++;
-		} else {
-			freq.insert(pair<char, int>(c, 1));
-		}
+    for(auto i = counts.begin(); i != counts.end(); i ++){
+        sortedCounts.insert(pair<size_t, char>(i->second, i->first));
+    }
 
-        content.push_back(c);
-	}
+    return sortedCounts;
 }
 
 double Text::ic() const {
@@ -69,6 +59,7 @@ double Text::ic() const {
 		return 0.0;
 	}
 
+    map<char, size_t > freq = countLetters();
 	//calculate numerator
 	int sum = 0;
 	for(auto i = freq.begin(); i != freq.end(); i++){
@@ -128,8 +119,8 @@ std::ostream &operator<<(std::ostream &os, const Text &t) {
 void Text::shiftBy(int n) {
     for(size_t i = 0; i < content.length(); i++){
         int tmp = content[i] - 'a';
-        tmp = ((tmp + n) % 26 + 26) % 26; //avoid negative remainders
-        content[i] = tmp + 'a';
+        tmp = ((tmp + n) % 26 + 26) % 26;   //avoid negative remainders
+        content[i] = tmp + 'a';             //safe - has been reduced modulo 26
     }
 }
 
@@ -157,9 +148,29 @@ size_t Text::englishTrigramCount() {
 void Text::multiply(int n) {
     for(size_t i = 0; i < content.size(); i++){
         int tmp = content[i] - 'a';
-        tmp = ((tmp * n) % 26 + 26) % 26; //avoid negative remainders
-        content[i] = tmp + 'a';
+        tmp = ((tmp * n) % 26 + 26) % 26;   //avoid negative remainders
+        content[i] = tmp + 'a';             //safe - has been reduced modulo 26
     }
 }
 
+std::map<char, size_t> Text::countLetters() const {
+    std::map<char, size_t > freq;
+    for(auto i = content.begin(); i != content.end(); i++){
+        //if the letter is not part of the alphabet then continue to the next one
+        if(!isalpha(*i)){
+            continue;
+        }
 
+        //lowercase all letters
+        char c = tolower(*i);
+
+        auto k = freq.find(c);
+        //if exists in map, increment count, else add 1
+        if(k != freq.end()){
+            (k->second)++;
+        } else {
+            freq.insert(pair<char, int>(c, 1));
+        }
+    }
+    return freq;
+}
