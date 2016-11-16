@@ -8,7 +8,7 @@
 #include <iostream>
 #include "Text.h"
 #include "optionparser.h"
-#include "Helper.h"
+#include "Util.h"
 #include <fstream>
 #include <sstream>
 #include <cmath>
@@ -23,8 +23,8 @@ const option::Descriptor usage[] =
                 {UNKNOWN, 0, "",  "",     option::Arg::None, "USAGE: decrypt -i input_file -o output_file\n\n"
                                                                      "Options: "},
                 {HELP,    0, "",  "help", option::Arg::None, "  --help                  \tPrint usage and exit."},
-                {INPUT,   0, "i", "in",   Helper::Required,     "  -i, --in input_file     \t[REQUIRED] Filename of cipher text."},
-                {OUTPUT,  0, "o", "out",  Helper::Required,     "  -o, --out output_file   \t[REQUIRED] Filename where decrypted plain text should be stored."},
+                {INPUT,   0, "i", "in",   Util::Required,     "  -i, --in input_file     \t[REQUIRED] Filename of cipher text."},
+                {OUTPUT,  0, "o", "out",  Util::Required,     "  -o, --out output_file   \t[REQUIRED] Filename where decrypted plain text should be stored."},
                 {0,       0, 0,   0,      0,                 0}
         };
 
