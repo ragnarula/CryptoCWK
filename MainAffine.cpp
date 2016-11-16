@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include "optionparser.h"
 #include "Text.h"
-#include "Helper.h"
+#include "Util.h"
 
 
 enum optionIndex {
@@ -21,10 +21,10 @@ const option::Descriptor usage[] =
                 {UNKNOWN, 0, "",  "",      option::Arg::None, "USAGE: shift -a multiplier -b shift -i input_file -o output_file\n\n"
                                                                       "Options: "},
                 {HELP,    0, "",  "help",  option::Arg::None, "  --help \tPrint usage and exit."},
-                {KEY_A,   0, "a", "key-a", Helper::Required,     "  -a, --key-a a_value \t[REQUIRED] The multiplier for the affine cipher. "},
-                {KEY_B,   0, "b", "key-b", Helper::Required,     "  -b, --key-b a_value \t[REQUIRED] The shift for the affine cipher. "},
-                {INPUT,   0, "i", "in",    Helper::Required,     "  -i, --in input_file \t[REQUIRED] Filename of plain text."},
-                {OUTPUT,  0, "o", "out",   Helper::Required,     "  -o, --out output_file \t[REQUIRED] Filename where cipher text should be stored."},
+                {KEY_A,   0, "a", "key-a", Util::Required,     "  -a, --key-a a_value \t[REQUIRED] The multiplier for the affine cipher. "},
+                {KEY_B,   0, "b", "key-b", Util::Required,     "  -b, --key-b a_value \t[REQUIRED] The shift for the affine cipher. "},
+                {INPUT,   0, "i", "in",    Util::Required,     "  -i, --in input_file \t[REQUIRED] Filename of plain text."},
+                {OUTPUT,  0, "o", "out",   Util::Required,     "  -o, --out output_file \t[REQUIRED] Filename where cipher text should be stored."},
                 {0,       0, 0,   0,       0,                 0}
         };
 
@@ -50,8 +50,8 @@ int main(int argc, char *argv[]) {
     }
 
     int multiplier = std::atoi(options[KEY_A].arg);
-    if(Helper::gcd(multiplier, 26) != 1){
-        std::cerr << "Multiplier must be relatively prime to 26, but gcd was: " << Helper::gcd(multiplier, 26) << std::endl;
+    if(Util::gcd(multiplier, 26) != 1){
+        std::cerr << "Multiplier must be relatively prime to 26, but gcd was: " << Util::gcd(multiplier, 26) << std::endl;
     }
 
     //read input

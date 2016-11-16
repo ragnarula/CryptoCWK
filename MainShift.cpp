@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include "optionparser.h"
 #include "Text.h"
-#include "Helper.h"
+#include "Util.h"
 
 
 enum optionIndex {
@@ -21,9 +21,9 @@ const option::Descriptor usage[] =
                 {UNKNOWN,     0, "",  "",      option::Arg::None, "USAGE: shift -k key -i input_file -o output_file\n\n"
                                                                           "Options: "},
                 {HELP,        0, "",  "help",  option::Arg::None, "  --help \tPrint usage and exit."},
-                {KEY, 0, "k", "count", Helper::Required,     "  -k, --key key \t[REQUIRED] The number of letters to shift each plain text character by. "},
-                {INPUT,       0, "i", "in",    Helper::Required,     "  -i, --in input_file \t[REQUIRED] Filename of plain text."},
-                {OUTPUT,      0, "o", "out",   Helper::Required,     "  -o, --out output_file \t[REQUIRED] Filename where cipher text should be stored."},
+                {KEY, 0, "k", "count", Util::Required,     "  -k, --key key \t[REQUIRED] The number of letters to shift each plain text character by. "},
+                {INPUT,       0, "i", "in",    Util::Required,     "  -i, --in input_file \t[REQUIRED] Filename of plain text."},
+                {OUTPUT,      0, "o", "out",   Util::Required,     "  -o, --out output_file \t[REQUIRED] Filename where cipher text should be stored."},
                 {0,           0, 0,   0,       0,                 0}
         };
 
