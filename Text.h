@@ -18,9 +18,8 @@ class Text {
 
     static const std::vector<std::string> trigrams;
 
+    std::map<char, size_t > countLetters() const;
 	std::string content;
-	std::map<char, int> freq;
-	void buildLetterFrequencyDistribution(const std::string&);
 
 public:
 
@@ -28,11 +27,12 @@ public:
 	Text(std::string&);
 	virtual ~Text();
     bool operator==(const Text& other) const;
-    size_t size() const;
+    unsigned int size() const;
 
 	double ic() const;
     size_t englishTrigramCount() const;
 	std::vector<Text> groupTo(const int) const;
+    std::multimap<size_t, char> getLetterFrequencies() const;
 
     void shiftForwards();
     void shiftBackwards();
@@ -40,7 +40,6 @@ public:
     void multiply(int i);
 
     friend std::ostream& operator<<(std::ostream& os, const Text& t);
-
 };
 
 #endif /* TEXT_H_ */
