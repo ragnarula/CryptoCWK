@@ -13,7 +13,7 @@
 #include <sstream>
 #include <cmath>
 
-
+using namespace std;
 enum optionIndex {
     UNKNOWN, HELP, INPUT, OUTPUT
 };
@@ -83,11 +83,54 @@ int main(int argc, char *argv[]) {
 
         if(maxCount > 0.2 * (plainText.size() / 3)){
             std::cout << "Decryption Success!\nShift cipher key: " << maxShift << std::endl;
+            return 0;
         } else {
             std::cout << "Shift cipher failed, attempting Affine." << std::endl;
         }
 
-//        multimap<size_t, char> letterFrequencies = plainText.
+        vector<char> letters = {'e','t','a','o','i','n','s','h','r','d','l','c','u','m','w','f','g','y','p','b','v','k','j','x','q','z'};
+        Text plainText2 = cipherText;
+        multimap<size_t, char> freqs = plainText2.getLetterFrequencies();
+
+        int c1 = freqs.rbegin()->second - 'a';
+        int c2 = (++freqs.rbegin())->second - 'a';
+        int cDiff = c1 - c2;
+
+        for(auto i = letters.begin(); i != letters.end(); i++){
+            for(auto j = letters.begin(); j != letters.end(); j++){
+
+                if(i == j){
+                    continue;
+                }
+
+                int x1 = *i - 'a';
+                int x2 = *j - 'a';
+                int xDiff = x1 - x2;
+                int xDiffInv = 0;
+                int y = 0;
+
+                int gcd = Util::gcdx(xDiff, 26, &xDiffInv, &y);
+
+                int A = (cDiff * xDiffInv) % 26;
+
+                int check = Util::gcd(A, 26);
+                if(check == 1){
+                    cout << "POTENTIAL A FOUND: " << A << endl;
+
+                    int aInv = 0;
+                    int yy = 0;
+
+                    Util::gcdx(A, 26, &aInv, &yy);
+                    int b = ((c1 - (A * x1)) % 26 + 26) % 26;
+                    Text p = cipherText;
+                    p.shiftBy(-b);
+                    p.multiply(aInv);
+                    cout << "B: " << b << " TRIGRAM COUNT: " << p.englishTrigramCount() << endl;
+                    i = --letters.end();
+                    j = --letters.end();
+                }
+            }
+        }
 
         return 0;
     }

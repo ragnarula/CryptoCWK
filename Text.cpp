@@ -46,7 +46,7 @@ multimap<size_t, char> Text::getLetterFrequencies() const {
     map<char, size_t > counts = countLetters();
     multimap<size_t, char> sortedCounts;
 
-    for(auto i = counts.begin(); i != counts.end(); i ++){
+    for(auto i = counts.begin(); i != counts.end(); i++){
         sortedCounts.insert(pair<size_t, char>(i->second, i->first));
     }
 
