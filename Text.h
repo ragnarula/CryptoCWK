@@ -27,19 +27,20 @@ public:
 	Text(const char *);
 	Text(std::string&);
 	virtual ~Text();
+    bool operator==(const Text& other) const;
+    size_t size() const;
+
 	double ic() const;
+    size_t englishTrigramCount() const;
 	std::vector<Text> groupTo(const int) const;
 
     void shiftForwards();
     void shiftBackwards();
 	void shiftBy(int);
+    void multiply(int i);
 
-    size_t englishTrigramCount();
-
-	bool operator==(const Text& other) const;
     friend std::ostream& operator<<(std::ostream& os, const Text& t);
 
-    void multiply(int i);
 };
 
 #endif /* TEXT_H_ */

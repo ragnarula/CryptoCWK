@@ -137,7 +137,7 @@ void Text::shiftBackwards() {
     shiftBy(-1);
 }
 
-size_t Text::englishTrigramCount() {
+size_t Text::englishTrigramCount() const {
     size_t sum = 0;
 
     for(size_t i = 0; i < trigrams.size(); i++){
@@ -160,6 +160,10 @@ void Text::multiply(int n) {
         tmp = ((tmp * n) % 26 + 26) % 26; //avoid negative remainders
         content[i] = tmp + 'a';
     }
+}
+
+size_t Text::size() const {
+    return content.size();
 }
 
 

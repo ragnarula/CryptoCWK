@@ -78,9 +78,17 @@ int main(int argc, char *argv[]) {
                 maxShift = i;
                 maxCount = count;
             }
-            std::cout << "Shift: " << i << " Trigrams: " << count << std::endl;
+//            std::cout << "Shift: " << i << " Trigrams: " << count << std::endl;
         }
-        std::cout << "Decryption Success!\nShift cipher key: " << maxShift << std::endl;
+
+        if(maxCount > 0.2 * (plainText.size() / 3)){
+            std::cout << "Decryption Success!\nShift cipher key: " << maxShift << std::endl;
+        } else {
+            std::cout << "Shift cipher failed, attempting Affine." << std::endl;
+        }
+
+//        multimap<size_t, char> letterFrequencies = plainText.
+
         return 0;
     }
 }
