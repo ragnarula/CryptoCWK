@@ -25,3 +25,23 @@ int Helper::gcd(int a, int b) {
     }
     return a;
 }
+
+int Helper::gcdx(int a, int b, int *x, int *y){
+
+    // Base Case
+    if (a == 0)
+    {
+        *x = 0;
+        *y = 1;
+        return b;
+    }
+
+    while(b != 0){
+        int tmp = b;
+        b = (a%b+b) % b;
+        a = tmp;
+        *x =
+        *y = tmp / b;
+    }
+    return a;
+}
