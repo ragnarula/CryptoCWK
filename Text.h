@@ -17,6 +17,7 @@
 class Text {
 
     static const std::vector<std::string> trigrams;
+    static const std::vector<char> frequentLetters;
 
     std::map<char, size_t > countLetters() const;
 	std::string content;
@@ -34,10 +35,15 @@ public:
 	std::vector<Text> groupTo(const int) const;
     std::multimap<size_t, char> getLetterFrequencies() const;
 
+    std::pair<int, int> solveMono() const;
+
     void shiftForwards();
     void shiftBackwards();
 	void shiftBy(int);
     void multiply(int i);
+
+
+//    void solvePoly();
 
     friend std::ostream& operator<<(std::ostream& os, const Text& t);
 };

@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 #include "Text.h"
+#include "Util.h"
 
 using namespace std;
 
@@ -29,6 +30,9 @@ const vector<string> Text::trigrams = {
         "sth",
         "men"
 };
+
+//frequent english letters in order
+const vector<char> Text::frequentLetters = {'e','t','a','o','i','n','s','h','r','d','l','c','u','m','w','f','g','y','p','b','v','k','j','x','q','z'};
 
 Text::Text(const char* data) : content(data) {
 
@@ -177,4 +181,58 @@ std::map<char, size_t> Text::countLetters() const {
         }
     }
     return freq;
+}
+
+std::pair<int, int> Text::solveMono() const {
+    multimap<size_t, char> freqs = getLetterFrequencies();
+
+    int c1 = freqs.rbegin()->second - 'a';
+    int c2 = (++freqs.rbegin())->second - 'a';
+    int cDiff = c1 - c2;
+
+    for(auto i = frequentLetters.begin(); i != frequentLetters.end(); i++){
+        for(auto j = frequentLetters.begin(); j != frequentLetters.end(); j++){
+
+            if(i == j){
+                continue;
+            }
+
+            //solve two linear congruences
+            // Ax + b = c mod 26
+            // A = (c1 - c2)(x1 - x1)^-1 mod 26
+            // where c1 and c2 are the two most frequent letters in cipher text
+            // and x1 and x2 are pairs of the most frequent letters in english
+
+            int x1 = *i - 'a';
+            int x2 = *j - 'a';
+            int xDiff = x1 - x2;
+            int xDiffInv = 0;
+            int y = 0;
+
+            int gcd = Util::gcdx(xDiff, 26, &xDiffInv, &y);
+
+            int A = (cDiff * xDiffInv) % 26;
+
+            int check = Util::gcd(A, 26);
+            if(check == 1){
+
+                int aInv = 0;
+                int yy = 0;
+
+                Util::gcdx(A, 26, &aInv, &yy);
+                int b = ((c1 - (A * x1)) % 26 + 26) % 26;
+                Text p = *this;
+                p.shiftBy(-b);
+                p.multiply(aInv);
+
+                //if more than 20% of trigrams match english trigrams consider solved
+                if(p.englishTrigramCount() > 0.2 * (p.size() / 3)){
+                    i = --frequentLetters.end();
+                    j = --frequentLetters.end();
+                    return std::pair<int, int>(aInv, -b);
+                }
+            }
+        }
+    }
+    return std::pair<int, int>(0,0);
 }
