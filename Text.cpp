@@ -6,6 +6,7 @@
  */
 
 #include <cstdlib>
+#include <algorithm>
 #include "Text.h"
 #include "Util.h"
 
@@ -183,13 +184,14 @@ std::map<char, size_t> Text::countLetters() const {
     return freq;
 }
 
-std::pair<int, int> Text::solveMono() const {
+MonoSolutionSet Text::solveMono() const {
     multimap<size_t, char> freqs = getLetterFrequencies();
 
     int c1 = freqs.rbegin()->second - 'a';
     int c2 = (++freqs.rbegin())->second - 'a';
     int cDiff = c1 - c2;
 
+    MonoSolutionSet solutions;
     for(auto i = frequentLetters.begin(); i != frequentLetters.end(); i++){
         for(auto j = frequentLetters.begin(); j != frequentLetters.end(); j++){
 
@@ -226,13 +228,119 @@ std::pair<int, int> Text::solveMono() const {
                 p.multiply(aInv);
 
                 //if more than 20% of trigrams match english trigrams consider solved
-                if(p.englishTrigramCount() > 0.2 * (p.size() / 3)){
-                    i = --frequentLetters.end();
-                    j = --frequentLetters.end();
-                    return std::pair<int, int>(aInv, -b);
+                size_t tcount = p.englishTrigramCount();
+                if(tcount > 0.2 * (p.size() / 3)){
+                    solutions.insert(MonoSolution(aInv, -b, tcount));
                 }
             }
         }
     }
-    return std::pair<int, int>(0,0);
+    return solutions;
+}
+
+VigenereSolutionSet Text::solvePoly() const {
+
+    set<size_t> positions = findTrigramRepetitions();
+    set<size_t> keyLengthGuesses = possibleKeyLengths(positions);
+
+    VigenereSolutionSet solutions;
+
+    for(auto i = keyLengthGuesses.begin(); i != keyLengthGuesses.end(); i++){
+        //for each col, solve mono,
+        vector<MonoSolutionSet> colSolutions;
+        vector<Text> cols = this->groupTo(*i);
+        for(auto j = cols.begin(); j != cols.end(); j++){
+
+            //TODO use MIC method
+
+        }
+
+        if(colSolutions.size() != *i){
+            ++i;
+            continue;
+        }
+
+        string potentialKey;
+        size_t count = 0;
+        for(auto k = colSolutions.begin(); k != colSolutions.end(); k++){
+            char s = 'a' + k->begin()->getShift(); //must fit as shift is mod 26
+            count += k->begin()->getTrigramCount();
+            potentialKey.push_back(s);
+        }
+
+        solutions.insert(VigenereSolution(potentialKey,count));
+    }
+
+    return solutions;
+}
+
+set<size_t> Text::possibleKeyLengths(set<size_t> &positions) const {
+    set<size_t> guesses;
+
+    if(positions.size() < 2){
+        return guesses;
+    }
+
+    auto first = positions.begin();
+    for(auto i = ++positions.begin(); i != positions.end(); i++){
+        guesses.insert(Util::gcd(*i, *first));
+    }
+    return guesses;
+}
+
+set<size_t> Text::findTrigramRepetitions() const {
+    set<size_t> positions;
+    for(size_t i = 0; i < content.size() - 3; i++){
+        string searchString = content.substr(i, 3);
+
+        size_t pos = 0;
+        size_t matches = 0;
+        while(pos != string::npos){
+            pos = content.find(searchString, pos);
+            if(pos != string::npos){
+                if(matches > 0){
+                    positions.insert(pos);
+                }
+                ++pos;
+                ++matches;
+            }
+
+        }
+    }
+    return positions;
+}
+
+void Text::vigenereAdd(const std::string &key) {
+    size_t index = 0;
+    for(auto i = content.begin(); i != content.end(); ++i, ++index){
+        char plain = *i  - 'a';
+        int ki = index % key.size();
+        char k =  key.at(ki) - 'a';
+        char shifted = ((plain + k) % 26) + 'a';
+        *i = shifted;
+    }
+}
+
+void Text::vigenereSubtract(const std::string &key) {
+    size_t index = 0;
+    for(auto i = content.begin(); i != content.end(); ++i, ++index){
+        char plain = *i  - 'a';
+        int ki = index % key.size();
+        char k =  key.at(ki) - 'a';
+        char shifted = (((plain - k) % 26 + 26) % 26) + 'a';
+        *i = shifted;
+    }
+}
+
+MonoSolutionSet Text::solveShift() const {
+    MonoSolutionSet solutions;
+    for(size_t i = 0; i < 26; ++i){
+        Text p = *this;
+        p.shiftBy(i);
+        size_t count = p.englishTrigramCount();
+        if(count > 0.2 * (p.size() / 3)){
+            solutions.insert(MonoSolution(0, i, count));
+        }
+    }
+    return solutions;
 }

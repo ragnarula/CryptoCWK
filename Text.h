@@ -13,6 +13,12 @@
 #include <map>
 #include <iostream>
 #include <string>
+#include <set>
+#include "MonoSolution.h"
+#include "VigenereSolution.h"
+
+typedef std::set<MonoSolution, std::greater<MonoSolution>> MonoSolutionSet;
+typedef std::set<VigenereSolution, std::greater<VigenereSolution>> VigenereSolutionSet;
 
 class Text {
 
@@ -22,6 +28,8 @@ class Text {
     std::map<char, size_t > countLetters() const;
 	std::string content;
 
+    std::set<size_t> findTrigramRepetitions() const;
+    std::set<size_t> possibleKeyLengths(std::set<size_t> &positions) const;
 public:
 
 	Text(const char *);
@@ -35,17 +43,21 @@ public:
 	std::vector<Text> groupTo(const int) const;
     std::multimap<size_t, char> getLetterFrequencies() const;
 
-    std::pair<int, int> solveMono() const;
+	MonoSolutionSet solveMono() const;
+    VigenereSolutionSet solvePoly() const;
+    MonoSolutionSet solveShift() const;
 
     void shiftForwards();
     void shiftBackwards();
 	void shiftBy(int);
     void multiply(int i);
+    void vigenereAdd(const std::string&);
+    void vigenereSubtract(const std::string&);
 
 
-//    void solvePoly();
 
     friend std::ostream& operator<<(std::ostream& os, const Text& t);
+
 };
 
 #endif /* TEXT_H_ */

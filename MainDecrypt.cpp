@@ -69,8 +69,11 @@ int main(int argc, char *argv[]) {
 
         const Text plainText = cipherText;
 
-        std::pair<int, int> s = plainText.solveMono();
-        std::cout << s.first << " " << s.second << std::endl;
+        MonoSolutionSet s = plainText.solveMono();
+        cout << "Best mono-alphabetic solution:" << endl;
+        cout << "\tContains " << s.begin()->getTrigramCount() << " English trigrams." << endl;
+        cout << "\tMultiplier:\t" << s.begin()->getMultiplier() << endl;
+        cout << "\tShift:\t" << s.begin()->getShift() << endl;
 
         return 0;
     }
