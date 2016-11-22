@@ -163,7 +163,7 @@ unsigned int Text::size() const {
 }
 
 std::map<char, size_t> Text::countLetters() const {
-    std::map<char, size_t > freq;
+    std::map<char, size_t> freq;
     for(auto i = content.begin(); i != content.end(); i++){
         //if the letter is not part of the alphabet then continue to the next one
         if(!isalpha(*i)){
