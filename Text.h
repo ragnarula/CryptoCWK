@@ -16,9 +16,11 @@
 #include <set>
 #include "MonoSolution.h"
 #include "VigenereSolution.h"
+#include "LetterFrequency.h"
 
 typedef std::set<MonoSolution, std::greater<MonoSolution>> MonoSolutionSet;
 typedef std::set<VigenereSolution, std::greater<VigenereSolution>> VigenereSolutionSet;
+typedef std::set<LetterFrequency, std::greater<LetterFrequency>> LetterFrequencySet;
 
 class Text {
 
@@ -36,12 +38,13 @@ public:
 	Text(std::string&);
 	virtual ~Text();
     bool operator==(const Text& other) const;
-    unsigned int size() const;
+    unsigned long size() const;
 
 	double ic() const;
+    double mic(const Text&) const;
     size_t englishTrigramCount() const;
 	std::vector<Text> groupTo(const int) const;
-    std::multimap<size_t, char> getLetterFrequencies() const;
+    LetterFrequencySet getLetterFrequencies() const;
 
 	MonoSolutionSet solveMono() const;
     VigenereSolutionSet solvePoly() const;
