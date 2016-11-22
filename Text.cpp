@@ -9,6 +9,7 @@
 #include <algorithm>
 #include "Text.h"
 #include "Util.h"
+#include "LetterFrequency.h"
 
 using namespace std;
 
@@ -46,16 +47,15 @@ Text::Text(std::string &s) : content(s){
 Text::~Text() {
 }
 
-multimap<size_t, char> Text::getLetterFrequencies() const {
+LetterFrequencySet Text::getLetterFrequencies() const {
 
-    map<char, size_t > counts = countLetters();
-    multimap<size_t, char> sortedCounts;
-
+    auto counts = countLetters();
+    LetterFrequencySet s;
     for(auto i = counts.begin(); i != counts.end(); i++){
-        sortedCounts.insert(pair<size_t, char>(i->second, i->first));
+        s.insert(i->second);
     }
 
-    return sortedCounts;
+    return s;
 }
 
 double Text::ic() const {
@@ -64,14 +64,14 @@ double Text::ic() const {
 		return 0.0;
 	}
 
-    map<char, size_t > freq = countLetters();
+    map<char, LetterFrequency> freq = countLetters();
 	//calculate numerator
 	int sum = 0;
 	for(auto i = freq.begin(); i != freq.end(); i++){
-		if(i->second == 1){
+		if(i->second.count == 1){
 			sum++;
-		} else if(i->second > 1){
-			sum += (i->second * (i->second - 1));
+		} else if(i->second.count > 1){
+			sum += (i->second.count * (i->second.count - 1));
 		}
 	}
 
@@ -162,11 +162,12 @@ unsigned int Text::size() const {
     return content.size();
 }
 
-std::map<char, size_t> Text::countLetters() const {
-    std::map<char, size_t > freq;
+std::map<char, LetterFrequency> Text::countLetters() const {
+    std::map<char, LetterFrequency> freq;
     for(auto i = content.begin(); i != content.end(); i++){
         //if the letter is not part of the alphabet then continue to the next one
         if(!isalpha(*i)){
+            i++;
             continue;
         }
 
@@ -176,19 +177,19 @@ std::map<char, size_t> Text::countLetters() const {
         auto k = freq.find(c);
         //if exists in map, increment count, else add 1
         if(k != freq.end()){
-            (k->second)++;
+            (k->second.count)++;
         } else {
-            freq.insert(pair<char, int>(c, 1));
+            freq.insert(pair<char, LetterFrequency>(c, LetterFrequency(c,1)));
         }
     }
     return freq;
 }
 
 MonoSolutionSet Text::solveMono() const {
-    multimap<size_t, char> freqs = getLetterFrequencies();
+    LetterFrequencySet freqs = getLetterFrequencies();
 
-    int c1 = freqs.rbegin()->second - 'a';
-    int c2 = (++freqs.rbegin())->second - 'a';
+    int c1 = freqs.rbegin()->letter - 'a';
+    int c2 = (++freqs.rbegin())->letter - 'a';
     int cDiff = c1 - c2;
 
     MonoSolutionSet solutions;
@@ -246,8 +247,6 @@ VigenereSolutionSet Text::solvePoly() const {
     VigenereSolutionSet solutions;
 
     for(auto i = keyLengthGuesses.begin(); i != keyLengthGuesses.end(); i++){
-        //for each col, solve mono,
-        vector<MonoSolutionSet> colSolutions;
         vector<Text> cols = this->groupTo(*i);
         for(auto j = cols.begin(); j != cols.end(); j++){
 
@@ -255,18 +254,6 @@ VigenereSolutionSet Text::solvePoly() const {
 
         }
 
-        if(colSolutions.size() != *i){
-            ++i;
-            continue;
-        }
-
-        string potentialKey;
-        size_t count = 0;
-        for(auto k = colSolutions.begin(); k != colSolutions.end(); k++){
-            char s = 'a' + k->begin()->getShift(); //must fit as shift is mod 26
-            count += k->begin()->getTrigramCount();
-            potentialKey.push_back(s);
-        }
 
         solutions.insert(VigenereSolution(potentialKey,count));
     }
@@ -343,4 +330,21 @@ MonoSolutionSet Text::solveShift() const {
         }
     }
     return solutions;
+}
+
+double Text::mic(const Text &other) const {
+    auto freqs1 = this->countLetters();
+    auto freqs2 = other.countLetters();
+
+    double mic = 0;
+    for(int i = 0; i < 26; ++i){
+        auto a = freqs1['a' + i];
+        auto b = freqs1['a' + i];
+
+        if(a.count != 0 && b.count != 0){
+            mic += (a.count/freqs1.size()) * (b.count/freqs2.size());
+        }
+    }
+
+    return mic;
 }

@@ -16,16 +16,18 @@
 #include <set>
 #include "MonoSolution.h"
 #include "VigenereSolution.h"
+#include "LetterFrequency.h"
 
 typedef std::set<MonoSolution, std::greater<MonoSolution>> MonoSolutionSet;
 typedef std::set<VigenereSolution, std::greater<VigenereSolution>> VigenereSolutionSet;
+typedef std::set<LetterFrequency, std::greater<LetterFrequency>> LetterFrequencySet;
 
 class Text {
 
     static const std::vector<std::string> trigrams;
     static const std::vector<char> frequentLetters;
 
-    std::map<char, size_t > countLetters() const;
+    std::map<char, LetterFrequency > countLetters() const;
 	std::string content;
 
     std::set<size_t> findTrigramRepetitions() const;
@@ -39,9 +41,10 @@ public:
     unsigned int size() const;
 
 	double ic() const;
+    double mic(const Text&) const;
     size_t englishTrigramCount() const;
 	std::vector<Text> groupTo(const int) const;
-    std::multimap<size_t, char> getLetterFrequencies() const;
+    LetterFrequencySet getLetterFrequencies() const;
 
 	MonoSolutionSet solveMono() const;
     VigenereSolutionSet solvePoly() const;
