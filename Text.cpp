@@ -7,8 +7,12 @@
 
 #include <cstdlib>
 #include <algorithm>
+#include <cmath>
+#include <cfloat>
 #include "Text.h"
 #include "Util.h"
+#include <limits>
+
 
 using namespace std;
 
@@ -64,12 +68,49 @@ const map<char, size_t> letterMap = {
         {'z',0}
 };
 
+const map<char, double> englishLetterProbabilities = {
+        {'e', 0.12702},
+        {'t', 0.09056},
+        {'a', 0.08167},
+        {'o', 0.07507},
+        {'i', 0.06996},
+        {'n', 0.06749},
+        {'s', 0.06327},
+        {'h', 0.06094},
+        {'r', 0.05987},
+        {'d', 0.04253},
+        {'l', 0.04025},
+        {'c', 0.02782},
+        {'u', 0.02758},
+        {'m', 0.02406},
+        {'w', 0.02360},
+        {'f', 0.02228},
+        {'g', 0.02015},
+        {'y', 0.01974},
+        {'p', 0.01929},
+        {'b', 0.01492},
+        {'v', 0.00978},
+        {'k', 0.00772},
+        {'j', 0.00153},
+        {'x', 0.00150},
+        {'q', 0.00095},
+        {'z', 0.00074}
+};
 Text::Text(const char* data) : content(data) {
-
+    for(auto i = data; *i != '\0'; ++i){
+        if(isalpha(*i)){
+            content.push_back(tolower(*i));
+        }
+    }
 }
 
-Text::Text(std::string &s) : content(s){
+Text::Text(std::string &s) {
 
+    for(auto i = s.begin(); i != s.end(); ++i){
+        if(isalpha(*i)){
+            content.push_back(tolower(*i));
+        }
+    }
 }
 
 Text::~Text() {
@@ -90,7 +131,7 @@ LetterFrequencySet Text::getLetterFrequencies() const {
 
 double Text::ic() const {
 	//if there is no content return 0.0 otherwise will get a division by 0
-	if(content.size() < 1){
+	if(content.size() < 2){
 		return 0.0;
 	}
 
@@ -98,23 +139,17 @@ double Text::ic() const {
 	//calculate numerator
 	int sum = 0;
 	for(auto i = freq.begin(); i != freq.end(); i++){
-		if(i->second == 1){
-			sum++;
-		} else if(i->second > 1){
+		if(i->second > 1){
 			sum += (i->second * (i->second - 1));
 		}
 	}
 
 	//calculator denominator
-	double divisor = 0.0;
-	if(content.size() == 1){
-		divisor = 1/26;
-	} else if(content.size() > 1){
-		divisor = (content.size() * (content.size() -1))/26;
-	}
+	double divisor = (content.size() * (content.size() - 1));
 
 	//divide
-	return sum/divisor;
+    double icValue = sum/divisor;
+	return icValue;
 }
 
 std::vector<Text> Text::groupTo(const int num) const {
@@ -195,10 +230,12 @@ unsigned long Text::size() const {
 
 std::map<char, size_t> Text::countLetters() const {
     std::map<char, size_t> freq = letterMap;
+    int j = 0;
     for(auto i = content.begin(); i != content.end(); i++){
         //if the letter is not part of the alphabet then continue to the next one
+        ++j;
         if(!isalpha(*i)){
-            i++;
+//            i++;
             continue;
         }
 
@@ -213,8 +250,8 @@ std::map<char, size_t> Text::countLetters() const {
 MonoSolutionSet Text::solveMono() const {
     LetterFrequencySet freqs = getLetterFrequencies();
 
-    int c1 = freqs.rbegin()->letter - 'a';
-    int c2 = (++freqs.rbegin())->letter - 'a';
+    int c1 = freqs.begin()->letter - 'a';
+    int c2 = (++freqs.begin())->letter - 'a';
     int cDiff = c1 - c2;
 
     MonoSolutionSet solutions;
@@ -255,60 +292,142 @@ MonoSolutionSet Text::solveMono() const {
 
                 //if more than 20% of trigrams match english trigrams consider solved
                 size_t tcount = p.englishTrigramCount();
-                if(tcount > 0.2 * (p.size() / 3)){
+//                if(tcount > 0.2 * (p.size() / 3)){
                     solutions.insert(MonoSolution(aInv, -b, tcount));
-                }
+//                }
             }
         }
     }
     return solutions;
 }
 
-VigenereSolutionSet Text::solvePoly() const {
-
-    set<size_t> positions = findTrigramRepetitions();
-    set<size_t> keyLengthGuesses = possibleKeyLengths(positions);
-
-    vector<string> maybeKeys;
-
-    for(auto i = keyLengthGuesses.begin(); i != keyLengthGuesses.end(); i++){
-        vector<Text> cols = this->groupTo(*i);
-        string maybeKey("a");
-
-        for(auto j = ++cols.begin(); j != cols.end(); j++){
-            char maxMICShift = 0;
-            double maxMIC = 0.0;
-
-            for(char k = 0; k < 26; ++k){
-                Text p = *j;
-                p.shiftBy(k);
-                double mic = cols[0].mic(p);
-                if(mic > maxMIC){
-                    maxMIC = mic;
-                    maxMICShift = k;
-                }
-            }
-            char k2 = (-maxMICShift % 26 + 26) % 26;
-            maybeKey.push_back(k2 + 'a');
-        }
-        maybeKeys.push_back(maybeKey);
+struct LengthIC{
+    size_t length = 0;
+    double ic = 0;
+    bool operator>(const LengthIC& rhs) const {
+        double thisDev = fabs(ic - 0.0667);
+        double thatDev = fabs(rhs.ic - 0.0667);
+        return thisDev < thatDev;
     }
+};
+
+VigenereSolutionSet Text::solvePoly() const {
+//
+//    set<size_t> positions = findTrigramRepetitions();
+//    set<size_t> keyLengthGuesses = possibleKeyLengths(positions);
+//
+//    vector<string> maybeKeys;
+//
+//    for(auto i = keyLengthGuesses.begin(); i != keyLengthGuesses.end(); i++){
+//        vector<Text> cols = this->groupTo(*i);
+//        string maybeKey("a");
+//
+//        for(auto j = ++cols.begin(); j != cols.end(); j++){
+//            char maxMICShift = 0;
+//            double maxMIC = 0.0;
+//
+//            for(char k = 0; k < 26; ++k){
+//                Text p = *j;
+//                p.shiftBy(k);
+//                double mic = cols[0].mic(p);
+//                if(mic > maxMIC){
+//                    maxMIC = mic;
+//                    maxMICShift = k;
+//                }
+//            }
+//            char k2 = (-maxMICShift % 26 + 26) % 26;
+//            maybeKey.push_back(k2 + 'a');
+//        }
+//        maybeKeys.push_back(maybeKey);
+//    }
 
     VigenereSolutionSet solutions;
-    for(auto i = maybeKeys.begin(); i != maybeKeys.end(); ++i){
-        for(char j = 0; j < 26; ++j){
-            string maybeKey = *i;
-            for(auto s = maybeKey.begin(); s != maybeKey.end(); ++s){
-                *s = (((*s - 'a') + j) % 26) + 'a';
-                Text p = *this;
-                p.vigenereSubtract(maybeKey);
-                size_t count = p.englishTrigramCount();
-                solutions.insert(VigenereSolution(maybeKey, count));
-//                cout << maybeKey << endl;
+//    for(auto i = maybeKeys.begin(); i != maybeKeys.end(); ++i){
+//        for(char j = 0; j < 26; ++j){
+//            string maybeKey = *i;
+//            for(auto s = maybeKey.begin(); s != maybeKey.end(); ++s){
+//                *s = (((*s - 'a') + j) % 26) + 'a';
+//                Text p = *this;
+//                p.vigenereSubtract(maybeKey);
+//                size_t count = p.englishTrigramCount();
+//                if(count > 0.2 * (p.size() / 3)) {
+//                    solutions.insert(VigenereSolution(maybeKey, count));
+//                }
+////                cout << maybeKey << endl;
+//            }
+//        }
+//    }
+    if(solutions.size() == 0){
+        set<LengthIC, std::greater<LengthIC>> ICSet;
+        for(size_t i = 2; i < 30; ++i){
+            vector<Text> cols = this->groupTo(i);
+            double sumIC = 0.0;
+            //take average of ic
+            // pick highest ic to solve
+            for(auto c = cols.begin(); c != cols.end(); ++c){
+                sumIC += c->ic();
             }
+
+            double averageIC = sumIC / i;
+//            if(averageIC > 0.064){
+                LengthIC l;
+                l.ic = averageIC;
+                l.length = i;
+                ICSet.insert(l);
+//            }
         }
+
+        auto bestIC = ICSet.begin();
+        size_t keyLength = bestIC->length;
+        if(ICSet.size() > 1){
+            size_t l1 = ICSet.begin()->length;
+            size_t l2 = (++ICSet.begin())->length;
+            keyLength = Util::gcd(l1, l2);
+        }
+        std::string key;
+        key.insert(0, keyLength, 'a');
+
+        vector<Text> cols = this->groupTo(keyLength);
+        size_t k = 0;
+        for(auto i = cols.begin(); i != cols.end(); ++i, ++k){
+            char s = i->bestChiSqShift();
+            key.at(k) = key.at(k) + s;
+        }
+        Text p = *this;
+        p.vigenereAdd(key);
+        solutions.insert(VigenereSolution(key, p.englishTrigramCount()));
     }
     return solutions;
+}
+
+char Text::bestChiSqShift(){
+    Text p = *this;
+    double minChiSq = p.chiSq();
+    int shift = 0;
+    for(int i = 1; i < 26; ++i){
+        p = *this;
+        p.shiftBy(i);
+        double c = p.chiSq();
+        if(c < minChiSq){
+            minChiSq = c;
+            shift = i;
+        }
+    }
+    return shift;
+}
+
+double Text::chiSq(){
+    auto counts = countLetters();
+    double sum = 0;
+    for(auto c = counts.begin(); c != counts.end(); ++c){
+        size_t count = c->second;
+        char letter = c->first;
+        double expected = englishLetterProbabilities.find(letter)->second;
+        double denom = content.length() * expected;
+        double num = pow((count - denom), 2);
+        sum += (num / denom);
+    }
+    return sum;
 }
 
 set<size_t> Text::possibleKeyLengths(set<size_t> &positions) const {
@@ -326,25 +445,31 @@ set<size_t> Text::possibleKeyLengths(set<size_t> &positions) const {
 }
 
 set<size_t> Text::findTrigramRepetitions() const {
-    set<size_t> positions;
+    set<size_t> offsets;
     for(size_t i = 0; i < content.size() - 3; i++){
         string searchString = content.substr(i, 3);
 
+        vector<size_t> positions;
         size_t pos = 0;
         size_t matches = 0;
         while(pos != string::npos){
             pos = content.find(searchString, pos);
             if(pos != string::npos){
-                if(matches > 0){
-                    positions.insert(pos);
-                }
+//                if(matches > 0){
+                    positions.push_back(pos);
+//                }
                 ++pos;
                 ++matches;
             }
-
+        }
+        if(positions.size() < 2) continue;
+        for(auto j = positions.begin(); j != (positions.end() - 1); ++j){
+            for(auto k = j + 1; k != positions.end(); ++k){
+                offsets.insert(*k - *j);
+            }
         }
     }
-    return positions;
+    return offsets;
 }
 
 void Text::vigenereAdd(const std::string &key) {
@@ -375,9 +500,7 @@ MonoSolutionSet Text::solveShift() const {
         Text p = *this;
         p.shiftBy(i);
         size_t count = p.englishTrigramCount();
-        if(count > 0.2 * (p.size() / 3)){
-            solutions.insert(MonoSolution(0, i, count));
-        }
+        solutions.insert(MonoSolution(0, i, count));
     }
     return solutions;
 }

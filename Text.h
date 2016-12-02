@@ -61,6 +61,9 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const Text& t);
 
+	double chiSq();
+
+	char bestChiSqShift();
 };
 
 #endif /* TEXT_H_ */

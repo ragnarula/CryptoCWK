@@ -14,6 +14,7 @@ class MonoSolution {
     size_t trigramCount;
 
 public:
+    MonoSolution() : multiplier(0), shift(0), trigramCount(0){};
     MonoSolution(int multiplier, int shift, size_t trigramCount);
     bool operator>(const MonoSolution& other) const;
     int getMultiplier() const;

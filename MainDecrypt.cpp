@@ -63,18 +63,23 @@ int main(int argc, char *argv[]) {
     const Text cipherText(str);
 
     //detect mono-alphabetic
-    if(fabs(cipherText.ic() - 1.73) < 0.1){
-        std::cout << "Cipher text index of coincidence: " << cipherText.ic() << std::endl;
-        std::cout << "Suspecting mono-alphabetic cipher." << std::endl;
+    std::cout << "Cipher text index of coincidence: " << cipherText.ic() << std::endl;
+    const Text plainText = cipherText;
+    MonoSolutionSet mono = plainText.solveMono();
+    MonoSolutionSet shift = plainText.solveShift();
+    VigenereSolutionSet vig = plainText.solvePoly();
 
-        const Text plainText = cipherText;
-
-        MonoSolutionSet s = plainText.solveMono();
-        cout << "Best mono-alphabetic solution:" << endl;
-        cout << "\tContains " << s.begin()->getTrigramCount() << " English trigrams." << endl;
-        cout << "\tMultiplier:\t" << s.begin()->getMultiplier() << endl;
-        cout << "\tShift:\t" << s.begin()->getShift() << endl;
-
-        return 0;
+    if(!mono.empty()){
+        cout << "Affine: \t" << mono.begin()->getTrigramCount() << endl;
     }
+    if(!shift.empty()){
+        cout << "Shift: \t" << shift.begin()->getTrigramCount() << endl;
+    }
+    if(!vig.empty()){
+        cout << "Vigenere: \t" << vig.begin()->getTrigramCount() << endl;
+    }
+
+
+    return 0;
+
 }

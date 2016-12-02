@@ -13,6 +13,7 @@ class VigenereSolution {
     std::string key;
     size_t trigramCount;
 public:
+    VigenereSolution() : key(""), trigramCount(0){};
     VigenereSolution(const std::string &key, const size_t trigramCount);
     bool operator>(const VigenereSolution& other) const;
     const std::string &getKey() const;
