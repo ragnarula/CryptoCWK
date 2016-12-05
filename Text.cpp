@@ -247,14 +247,14 @@ std::map<char, size_t> Text::countLetters() const {
     return freq;
 }
 
-MonoSolutionSet Text::solveMono() const {
+MonoSolutionSetByTrigrams Text::solveMono() const {
     LetterFrequencySet freqs = getLetterFrequencies();
 
     int c1 = freqs.begin()->letter - 'a';
     int c2 = (++freqs.begin())->letter - 'a';
     int cDiff = c1 - c2;
 
-    MonoSolutionSet solutions;
+    MonoSolutionSetByTrigrams solutions;
     for(auto i = frequentLetters.begin(); i != frequentLetters.end(); i++){
         for(auto j = frequentLetters.begin(); j != frequentLetters.end(); j++){
 
@@ -292,8 +292,9 @@ MonoSolutionSet Text::solveMono() const {
 
                 //if more than 20% of trigrams match english trigrams consider solved
                 size_t tcount = p.englishTrigramCount();
+                double chi = p.chiSq();
 //                if(tcount > 0.2 * (p.size() / 3)){
-                    solutions.insert(MonoSolution(aInv, -b, tcount));
+                solutions.insert(MonoSolution(aInv, -b, tcount, chi));
 //                }
             }
         }
@@ -311,79 +312,29 @@ struct LengthIC{
     }
 };
 
-VigenereSolutionSet Text::solvePoly() const {
-//
-//    set<size_t> positions = findTrigramRepetitions();
-//    set<size_t> keyLengthGuesses = possibleKeyLengths(positions);
-//
-//    vector<string> maybeKeys;
-//
-//    for(auto i = keyLengthGuesses.begin(); i != keyLengthGuesses.end(); i++){
-//        vector<Text> cols = this->groupTo(*i);
-//        string maybeKey("a");
-//
-//        for(auto j = ++cols.begin(); j != cols.end(); j++){
-//            char maxMICShift = 0;
-//            double maxMIC = 0.0;
-//
-//            for(char k = 0; k < 26; ++k){
-//                Text p = *j;
-//                p.shiftBy(k);
-//                double mic = cols[0].mic(p);
-//                if(mic > maxMIC){
-//                    maxMIC = mic;
-//                    maxMICShift = k;
-//                }
-//            }
-//            char k2 = (-maxMICShift % 26 + 26) % 26;
-//            maybeKey.push_back(k2 + 'a');
-//        }
-//        maybeKeys.push_back(maybeKey);
-//    }
+VigenereSolutionSet Text::solveVigenere() const {
 
     VigenereSolutionSet solutions;
-//    for(auto i = maybeKeys.begin(); i != maybeKeys.end(); ++i){
-//        for(char j = 0; j < 26; ++j){
-//            string maybeKey = *i;
-//            for(auto s = maybeKey.begin(); s != maybeKey.end(); ++s){
-//                *s = (((*s - 'a') + j) % 26) + 'a';
-//                Text p = *this;
-//                p.vigenereSubtract(maybeKey);
-//                size_t count = p.englishTrigramCount();
-//                if(count > 0.2 * (p.size() / 3)) {
-//                    solutions.insert(VigenereSolution(maybeKey, count));
-//                }
-////                cout << maybeKey << endl;
-//            }
-//        }
-//    }
-    if(solutions.size() == 0){
-        set<LengthIC, std::greater<LengthIC>> ICSet;
-        for(size_t i = 2; i < 30; ++i){
-            vector<Text> cols = this->groupTo(i);
-            double sumIC = 0.0;
-            //take average of ic
-            // pick highest ic to solve
-            for(auto c = cols.begin(); c != cols.end(); ++c){
-                sumIC += c->ic();
-            }
 
-            double averageIC = sumIC / i;
-//            if(averageIC > 0.064){
-                LengthIC l;
-                l.ic = averageIC;
-                l.length = i;
-                ICSet.insert(l);
-//            }
+    set<LengthIC, std::greater<LengthIC>> ICSet;
+    for(size_t i = 1; i < 30; ++i){
+        vector<Text> cols = this->groupTo(i);
+        double sumIC = 0.0;
+        //take average of ic
+        for(auto c = cols.begin(); c != cols.end(); ++c){
+            sumIC += c->ic();
         }
+        double averageIC = sumIC / i;
+        LengthIC l;
+        if(averageIC > 0.06){
+            l.ic = averageIC;
+            l.length = i;
+            ICSet.insert(l);
+        }
+    }
 
-        auto bestIC = ICSet.begin();
-        size_t keyLength = bestIC->length;
-        if(ICSet.size() > 1){
-            size_t l1 = ICSet.begin()->length;
-            size_t l2 = (++ICSet.begin())->length;
-            keyLength = Util::gcd(l1, l2);
-        }
+    for(auto i = ICSet.begin(); i != ICSet.end(); ++i){
+        size_t keyLength = i->length;
         std::string key;
         key.insert(0, keyLength, 'a');
 
@@ -397,7 +348,57 @@ VigenereSolutionSet Text::solvePoly() const {
         p.vigenereAdd(key);
         solutions.insert(VigenereSolution(key, p.englishTrigramCount()));
     }
+
+
     return solutions;
+}
+
+void Text::solvePoly2() const{
+    VigenereSolutionSet solutions;
+
+    set<LengthIC, std::greater<LengthIC>> ICSet;
+    for(size_t i = 2; i < 30; ++i){
+        vector<Text> cols = this->groupTo(i);
+        double sumIC = 0.0;
+        //take average of ic
+        for(auto c = cols.begin(); c != cols.end(); ++c){
+            sumIC += c->ic();
+        }
+        double averageIC = sumIC / i;
+        LengthIC l;
+        l.ic = averageIC;
+        l.length = i;
+        ICSet.insert(l);
+    }
+
+    auto bestIC = ICSet.begin();
+    size_t keyLength = bestIC->length;
+    if(ICSet.size() > 1){
+        size_t l1 = ICSet.begin()->length;
+        size_t l2 = (++ICSet.begin())->length;
+        size_t smaller = l1 < l2 ? l1 : l2;
+        size_t larger = l1 > l2 ? l1 : l2;
+
+        for(int i = smaller-1; i != 1; --i){
+            if(smaller % i == 0 && larger % i == 0){
+                keyLength = i;
+                break;
+            }
+        }
+    }
+    std::string key;
+    key.insert(0, keyLength, 'a');
+
+    vector<Text> cols = this->groupTo(keyLength);
+    size_t k = 0;
+    for(auto i = cols.begin(); i != cols.end(); ++i, ++k){
+        char s = i->bestChiSqShift();
+        key.at(k) = key.at(k) + s;
+    }
+    Text p = *this;
+    p.vigenereAdd(key);
+    solutions.insert(VigenereSolution(key, p.englishTrigramCount()));
+
 }
 
 char Text::bestChiSqShift(){
@@ -456,7 +457,7 @@ set<size_t> Text::findTrigramRepetitions() const {
             pos = content.find(searchString, pos);
             if(pos != string::npos){
 //                if(matches > 0){
-                    positions.push_back(pos);
+                positions.push_back(pos);
 //                }
                 ++pos;
                 ++matches;
@@ -494,13 +495,14 @@ void Text::vigenereSubtract(const std::string &key) {
     }
 }
 
-MonoSolutionSet Text::solveShift() const {
-    MonoSolutionSet solutions;
+MonoSolutionSetByTrigrams Text::solveShift() const {
+    MonoSolutionSetByTrigrams solutions;
     for(size_t i = 0; i < 26; ++i){
         Text p = *this;
         p.shiftBy(i);
         size_t count = p.englishTrigramCount();
-        solutions.insert(MonoSolution(0, i, count));
+        double chi = p.chiSq();
+        solutions.insert(MonoSolution(0, i, count, chi));
     }
     return solutions;
 }

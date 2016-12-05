@@ -143,7 +143,7 @@ TEST_CASE("Solve Poly"){
     Text t("aaaathisthataaaawherethistherethataaaatoisthisthat");
     t.vigenereAdd(key);
 
-    VigenereSolutionSet s = t.solvePoly();
+    VigenereSolutionSet s = t.solveVigenere();
 
     REQUIRE(s.begin()->getKey() == "keyw");
 }

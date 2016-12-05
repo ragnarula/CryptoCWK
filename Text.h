@@ -18,7 +18,8 @@
 #include "VigenereSolution.h"
 #include "LetterFrequency.h"
 
-typedef std::set<MonoSolution, std::greater<MonoSolution>> MonoSolutionSet;
+typedef std::set<MonoSolution, std::greater<MonoSolution>> MonoSolutionSetByTrigrams;
+typedef std::set<MonoSolution, std::less<MonoSolution>> MonoSolutionSetByChi;
 typedef std::set<VigenereSolution, std::greater<VigenereSolution>> VigenereSolutionSet;
 typedef std::set<LetterFrequency, std::greater<LetterFrequency>> LetterFrequencySet;
 
@@ -46,9 +47,9 @@ public:
 	std::vector<Text> groupTo(const int) const;
     LetterFrequencySet getLetterFrequencies() const;
 
-	MonoSolutionSet solveMono() const;
-    VigenereSolutionSet solvePoly() const;
-    MonoSolutionSet solveShift() const;
+	MonoSolutionSetByTrigrams solveMono() const;
+    VigenereSolutionSet solveVigenere() const;
+    MonoSolutionSetByTrigrams solveShift() const;
 
     void shiftForwards();
     void shiftBackwards();
@@ -64,6 +65,8 @@ public:
 	double chiSq();
 
 	char bestChiSqShift();
+
+	void solvePoly2() const;
 };
 
 #endif /* TEXT_H_ */

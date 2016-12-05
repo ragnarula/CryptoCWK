@@ -20,11 +20,11 @@ enum optionIndex {
 
 const option::Descriptor usage[] =
         {
-                {UNKNOWN, 0, "",  "",     option::Arg::None, "USAGE: decrypt -i input_file -o output_file\n\n"
+                {UNKNOWN, 0, "",  "",     option::Arg::None, "USAGE: decrypt -i input_file -o output_prefix\n\n"
                                                                      "Options: "},
                 {HELP,    0, "",  "help", option::Arg::None, "  --help                  \tPrint usage and exit."},
                 {INPUT,   0, "i", "in",   Util::Required,     "  -i, --in input_file     \t[REQUIRED] Filename of cipher text."},
-                {OUTPUT,  0, "o", "out",  Util::Required,     "  -o, --out output_file   \t[REQUIRED] Filename where decrypted plain text should be stored."},
+                {OUTPUT,  0, "o", "out",  Util::Required,     "  -o, --out output_prefix   \t[REQUIRED] Prefix for output file name <prefix><cipher>.txt"},
                 {0,       0, 0,   0,      0,                 0}
         };
 
@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    string prefix = string(options[OUTPUT].arg);
     //read input
     std::ifstream input(options[INPUT].arg);
 
@@ -65,18 +66,47 @@ int main(int argc, char *argv[]) {
     //detect mono-alphabetic
     std::cout << "Cipher text index of coincidence: " << cipherText.ic() << std::endl;
     const Text plainText = cipherText;
-    MonoSolutionSet mono = plainText.solveMono();
-    MonoSolutionSet shift = plainText.solveShift();
-    VigenereSolutionSet vig = plainText.solvePoly();
+
+    MonoSolutionSetByTrigrams mono = plainText.solveMono();
+    MonoSolutionSetByTrigrams shift = plainText.solveShift();
+    VigenereSolutionSet vig = plainText.solveVigenere();
 
     if(!mono.empty()){
-        cout << "Affine: \t" << mono.begin()->getTrigramCount() << endl;
+        cout << "Affine Solution found: \t" << mono.begin()->getTrigramCount() << endl;
+        Text p = cipherText;
+        p.multiply(mono.begin()->getMultiplier());
+        p.shiftBy(mono.begin()->getShift());
+        string filename = prefix + "_affine.txt";
+        std::ofstream output(filename);
+        output << p;
+
+        if (output.fail()) {
+            std::cerr << "Failed to write output to: " << filename << std::endl;
+        }
     }
     if(!shift.empty()){
-        cout << "Shift: \t" << shift.begin()->getTrigramCount() << endl;
+        cout << "Shift solution found: \t" << shift.begin()->getTrigramCount() << endl;
+        Text p = cipherText;
+        p.shiftBy(shift.begin()->getShift());
+        string filename = prefix + "_shift.txt";
+        std::ofstream output(filename);
+        output << cipherText;
+
+        if (output.fail()) {
+            std::cerr << "Failed to write output to: " << filename << std::endl;
+        }
     }
     if(!vig.empty()){
-        cout << "Vigenere: \t" << vig.begin()->getTrigramCount() << endl;
+        cout << "Vigenere solution found: \t" << vig.begin()->getTrigramCount() << endl;
+        Text p = cipherText;
+        p.vigenereAdd(vig.begin()->getKey());
+        string filename = prefix + "_vigenere.txt";
+        std::ofstream output(filename);
+        output << cipherText;
+
+        if (output.fail()) {
+            std::cerr << "Failed to write output to: " << filename << std::endl;
+        }
     }
 
 

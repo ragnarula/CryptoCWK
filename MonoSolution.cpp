@@ -4,8 +4,8 @@
 
 #include "MonoSolution.h"
 
-MonoSolution::MonoSolution(int multiplier, int shift, size_t trigramCount)
-        : multiplier(multiplier), shift(shift), trigramCount(trigramCount) {}
+MonoSolution::MonoSolution(int multiplier, int shift, size_t trigramCount, double chi)
+        : multiplier(multiplier), shift(shift), trigramCount(trigramCount), chi(chi) {}
 
 bool MonoSolution::operator>(const MonoSolution &other) const {
     return trigramCount > other.trigramCount;
@@ -21,4 +21,8 @@ int MonoSolution::getShift() const {
 
 size_t MonoSolution::getTrigramCount() const {
     return trigramCount;
+}
+
+bool MonoSolution::operator<(const MonoSolution &other) const {
+    return chi < other.chi;
 }
