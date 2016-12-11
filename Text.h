@@ -25,15 +25,14 @@ typedef std::set<LetterFrequency, std::greater<LetterFrequency>> LetterFrequency
 
 class Text {
 
-    static const std::vector<std::string> trigrams;
-    static const std::vector<char> frequentLetters;
+
 
     std::map<char, size_t > countLetters() const;
 	std::string content;
 
-    std::set<size_t> findTrigramRepetitions() const;
-    std::set<size_t> possibleKeyLengths(std::set<size_t> &positions) const;
 public:
+    static const std::vector<std::string> trigrams;
+    static const std::vector<char> frequentLetters;
 
 	Text(const char *);
 	Text(std::string&);
@@ -62,11 +61,21 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, const Text& t);
 
-	double chiSq();
+	double chiSqUnigram() const;
 
-	char bestChiSqShift();
+	char bestChiSqShift() const;
 
 	void solvePoly2() const;
+
+    void substitute(const std::string &key);
+
+    double gramFitness() const;
+
+    size_t countOccurancesOf(const std::string &sub) const;
+
+    double chiSqNGram(const std::map<std::string, double> &probs) const;
+
+    double nGramDistance(const std::map<std::string, double> &probs) const;
 };
 
 #endif /* TEXT_H_ */

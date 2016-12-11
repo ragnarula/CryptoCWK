@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cfloat>
+#include "stats.h"
 #include "Text.h"
 #include "Util.h"
 #include <limits>
@@ -68,41 +69,15 @@ const map<char, size_t> letterMap = {
         {'z',0}
 };
 
-const map<char, double> englishLetterProbabilities = {
-        {'e', 0.12702},
-        {'t', 0.09056},
-        {'a', 0.08167},
-        {'o', 0.07507},
-        {'i', 0.06996},
-        {'n', 0.06749},
-        {'s', 0.06327},
-        {'h', 0.06094},
-        {'r', 0.05987},
-        {'d', 0.04253},
-        {'l', 0.04025},
-        {'c', 0.02782},
-        {'u', 0.02758},
-        {'m', 0.02406},
-        {'w', 0.02360},
-        {'f', 0.02228},
-        {'g', 0.02015},
-        {'y', 0.01974},
-        {'p', 0.01929},
-        {'b', 0.01492},
-        {'v', 0.00978},
-        {'k', 0.00772},
-        {'j', 0.00153},
-        {'x', 0.00150},
-        {'q', 0.00095},
-        {'z', 0.00074}
-};
-Text::Text(const char* data) : content(data) {
+
+Text::Text(const char* data) {
     for(auto i = data; *i != '\0'; ++i){
         if(isalpha(*i)){
             content.push_back(tolower(*i));
         }
     }
 }
+
 
 Text::Text(std::string &s) {
 
@@ -113,8 +88,10 @@ Text::Text(std::string &s) {
     }
 }
 
+
 Text::~Text() {
 }
+
 
 LetterFrequencySet Text::getLetterFrequencies() const {
 
@@ -128,6 +105,7 @@ LetterFrequencySet Text::getLetterFrequencies() const {
 
     return s;
 }
+
 
 double Text::ic() const {
 	//if there is no content return 0.0 otherwise will get a division by 0
@@ -152,6 +130,7 @@ double Text::ic() const {
 	return icValue;
 }
 
+
 std::vector<Text> Text::groupTo(const int num) const {
 
     vector<Text> groups;
@@ -169,6 +148,7 @@ std::vector<Text> Text::groupTo(const int num) const {
 	return groups;
 }
 
+
 bool Text::operator==(const Text &other) const {
     if(&other == this){
         return true;
@@ -177,14 +157,17 @@ bool Text::operator==(const Text &other) const {
     return content == other.content;
 }
 
+
 void Text::shiftForwards() {
     shiftBy(1);
 }
+
 
 std::ostream &operator<<(std::ostream &os, const Text &t) {
     os << t.content;
     return os;
 }
+
 
 void Text::shiftBy(int n) {
     for(size_t i = 0; i < content.length(); i++){
@@ -198,22 +181,27 @@ void Text::shiftBackwards() {
     shiftBy(-1);
 }
 
-size_t Text::englishTrigramCount() const {
-    size_t sum = 0;
 
-    for(size_t i = 0; i < trigrams.size(); i++){
-        size_t pos = 0;
-        while(pos != string::npos){
-            pos = content.find(trigrams[i], pos);
-            if(pos != string::npos){
-                sum++;
-                pos++;
-            }
-        }
+size_t Text::englishTrigramCount() const {
+    size_t count = 0;
+    for(auto t = trigrams.begin(); t !=  trigrams.end(); ++t){
+
+        count += countOccurancesOf(*t);
     }
 
-    return sum;
+    return count;
 }
+
+
+size_t Text::countOccurancesOf(const string &sub) const {
+    size_t count = 0;
+    for (size_t offset = content.find(sub); offset != string::npos; offset = content.find(sub, offset + sub.length()))
+    {
+        ++count;
+    }
+    return count;
+}
+
 
 void Text::multiply(int n) {
     for(size_t i = 0; i < content.size(); i++){
@@ -247,6 +235,7 @@ std::map<char, size_t> Text::countLetters() const {
     return freq;
 }
 
+
 MonoSolutionSetByTrigrams Text::solveMono() const {
     LetterFrequencySet freqs = getLetterFrequencies();
 
@@ -262,7 +251,7 @@ MonoSolutionSetByTrigrams Text::solveMono() const {
                 continue;
             }
 
-            //solve two linear congruences
+            //HillClimb two linear congruences
             // Ax + b = c mod 26
             // A = (c1 - c2)(x1 - x1)^-1 mod 26
             // where c1 and c2 are the two most frequent letters in cipher text
@@ -292,7 +281,7 @@ MonoSolutionSetByTrigrams Text::solveMono() const {
 
                 //if more than 20% of trigrams match english trigrams consider solved
                 size_t tcount = p.englishTrigramCount();
-                double chi = p.chiSq();
+                double chi = p.chiSqUnigram();
 //                if(tcount > 0.2 * (p.size() / 3)){
                 solutions.insert(MonoSolution(aInv, -b, tcount, chi));
 //                }
@@ -301,6 +290,7 @@ MonoSolutionSetByTrigrams Text::solveMono() const {
     }
     return solutions;
 }
+
 
 struct LengthIC{
     size_t length = 0;
@@ -311,6 +301,7 @@ struct LengthIC{
         return thisDev < thatDev;
     }
 };
+
 
 VigenereSolutionSet Text::solveVigenere() const {
 
@@ -352,6 +343,7 @@ VigenereSolutionSet Text::solveVigenere() const {
 
     return solutions;
 }
+
 
 void Text::solvePoly2() const{
     VigenereSolutionSet solutions;
@@ -401,14 +393,15 @@ void Text::solvePoly2() const{
 
 }
 
-char Text::bestChiSqShift(){
+
+char Text::bestChiSqShift() const{
     Text p = *this;
-    double minChiSq = p.chiSq();
+    double minChiSq = p.chiSqUnigram();
     int shift = 0;
     for(int i = 1; i < 26; ++i){
         p = *this;
         p.shiftBy(i);
-        double c = p.chiSq();
+        double c = p.chiSqUnigram();
         if(c < minChiSq){
             minChiSq = c;
             shift = i;
@@ -417,13 +410,14 @@ char Text::bestChiSqShift(){
     return shift;
 }
 
-double Text::chiSq(){
+double Text::chiSqUnigram() const{
     auto counts = countLetters();
     double sum = 0;
     for(auto c = counts.begin(); c != counts.end(); ++c){
         size_t count = c->second;
-        char letter = c->first;
-        double expected = englishLetterProbabilities.find(letter)->second;
+        string letter;
+        letter.push_back(c->first);
+        double expected = unigramProbs.find(letter)->second;
         double denom = content.length() * expected;
         double num = pow((count - denom), 2);
         sum += (num / denom);
@@ -431,47 +425,38 @@ double Text::chiSq(){
     return sum;
 }
 
-set<size_t> Text::possibleKeyLengths(set<size_t> &positions) const {
-    set<size_t> guesses;
-
-    if(positions.size() < 2){
-        return guesses;
+double Text::chiSqNGram(const map<string, double> &probs) const{
+    map<string, size_t > counts;
+    for(auto b = probs.begin(); b != probs.end(); ++b){
+        counts[b->first] = countOccurancesOf(b->first);
     }
-
-    auto first = positions.begin();
-    for(auto i = ++positions.begin(); i != positions.end(); i++){
-        guesses.insert(Util::gcd(*i, *first));
+    double sum = 0;
+    for(auto c = counts.begin(); c != counts.end(); ++c){
+        size_t count = c->second;
+        string gram = c->first;
+        double expected = probs.find(gram)->second;
+        double denom = content.length() * expected;
+        double num = pow((count - denom), 2);
+        sum += (num / denom);
     }
-    return guesses;
+    return sum;
 }
 
-set<size_t> Text::findTrigramRepetitions() const {
-    set<size_t> offsets;
-    for(size_t i = 0; i < content.size() - 3; i++){
-        string searchString = content.substr(i, 3);
 
-        vector<size_t> positions;
-        size_t pos = 0;
-        size_t matches = 0;
-        while(pos != string::npos){
-            pos = content.find(searchString, pos);
-            if(pos != string::npos){
-//                if(matches > 0){
-                positions.push_back(pos);
-//                }
-                ++pos;
-                ++matches;
-            }
-        }
-        if(positions.size() < 2) continue;
-        for(auto j = positions.begin(); j != (positions.end() - 1); ++j){
-            for(auto k = j + 1; k != positions.end(); ++k){
-                offsets.insert(*k - *j);
-            }
-        }
+double Text::nGramDistance(const map<string, double> &probs) const{
+    double sumExpected = 0;
+    double sumActual = 0;
+
+    //count occurances of common ngrams
+    for(auto b = probs.begin(); b != probs.end(); ++b){
+        size_t count = countOccurancesOf(b->first);
+        sumActual += (double) count / (double) content.size();
+        sumExpected += b->second * content.size();
     }
-    return offsets;
+
+    return sumExpected - sumActual;
 }
+
 
 void Text::vigenereAdd(const std::string &key) {
     size_t index = 0;
@@ -484,6 +469,7 @@ void Text::vigenereAdd(const std::string &key) {
     }
 }
 
+
 void Text::vigenereSubtract(const std::string &key) {
     size_t index = 0;
     for(auto i = content.begin(); i != content.end(); ++i, ++index){
@@ -495,17 +481,19 @@ void Text::vigenereSubtract(const std::string &key) {
     }
 }
 
+
 MonoSolutionSetByTrigrams Text::solveShift() const {
     MonoSolutionSetByTrigrams solutions;
     for(size_t i = 0; i < 26; ++i){
         Text p = *this;
         p.shiftBy(i);
         size_t count = p.englishTrigramCount();
-        double chi = p.chiSq();
+        double chi = p.chiSqUnigram();
         solutions.insert(MonoSolution(0, i, count, chi));
     }
     return solutions;
 }
+
 
 double Text::mic(const Text &other) const {
     auto letterCountsThis = this->countLetters();
@@ -520,4 +508,33 @@ double Text::mic(const Text &other) const {
     }
 
     return m;
+}
+
+
+void Text::substitute(const std::string &key) {
+    map<char, char> keymap;
+    char l = 'a';
+    for(auto i = key.begin(); i != key.end(); ++i, ++l){
+        keymap[l] = *i;
+    }
+    string newContent;
+    for(auto c = content.begin(); c != content.end(); ++c){
+        auto cc = keymap.find(*c);
+        if(cc != keymap.end()){
+            newContent.push_back(cc->second);
+        } else {
+            newContent.push_back(*c);
+        }
+    }
+    content = newContent;
+}
+
+
+double Text::gramFitness() const{
+    double uniGramScore = nGramDistance(unigramProbs);
+    double biGramScore = nGramDistance(bigramProbs);
+    double triGramScore = nGramDistance(trigramProbs);
+    double quadGramScore = nGramDistance(quadgramProbs);
+
+    return uniGramScore + (biGramScore) + (triGramScore) + (quadGramScore);
 }

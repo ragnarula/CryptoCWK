@@ -1,0 +1,31 @@
+//
+// Created by Raghav Narula on 10/12/2016.
+//
+
+#include "catch.hpp"
+#include "Text.h"
+#include "MonoSubstitutionSolver.h"
+using namespace std;
+
+TEST_CASE("substitute test"){
+    Text a("abcdefghijklmnopqrstuvwxyz");
+    a.substitute("zyxwvutsrqponmlkjihgfedcba");
+    REQUIRE(a == Text("zyxwvutsrqponmlkjihgfedcba"));
+
+}
+
+
+TEST_CASE("Decrypt"){
+    Text c("alanmathisonturingobefrstjrjunejunewasanenglishcomputerscientistmathematicianlogiciancryptanalystandtheoreticalbiologisthewashighlyinfluentialinthedevelopmentoftheoreticalcomputerscienceprovidingaformalisationoftheconceptsofalgorithmandcomputationwiththeturingmachinewhichcanbeconsideredamodelofageneralpurposecomputerturingiswidelyconsideredtobethefatheroftheoreticalcomputerscienceandartificialintelligenceduringthesecondworldwarturingworkedforthegovernmentcodeandcypherschoolgccsatbletchleyparkbritainscodebreakingcentreforatimeheledhutthesectionresponsibleforgermannavalcryptanalysishedevisedanumberoftechniquesforspeedingthebreakingofgermanciphersincludingimprovementstotheprewarpolishbombemethodanelectromechanicalmachinethatcouldfindsettingsfortheenigmamachineturingplayedapivotalroleincrackinginterceptedcodedmessagesthatenabledthealliestodefeatthenazisinmanycrucialengagementsincludingthebattleoftheatlanticithasbeenestimatedthatthisworkshortenedthewarineuropebymorethantwoyearsandsavedoverfourteenmillionlivesafterthewarheworkedatthenationalphysicallaboratorywherehedesignedtheaceamongthefirstdesignsforastoredprogramcomputerinturingjoinedmaxnewmanscomputingmachinelaboratoryatthevictoriauniversityofmanchesterwherehehelpeddevelopthemanchestercomputersandbecameinterestedinmathematicalbiologyhewroteapaperonthechemicalbasisofmorphogenesisandpredictedoscillatingchemicalreactionssuchasthebelousovzhabotinskyreactionfirstobservedinthesturingwasprosecutedinforhomosexualactswhenitwasstillacriminalactintheukheacceptedtreatmentwithdeschemicalcastrationasanalternativetoprisonturingdiedindaysbeforehisndbirthdayfromcyanidepoisoninganinquestdeterminedhisdeathassuicidebutithasbeennotedthattheknownevidenceisequallyconsistentwithaccidentalpoisoninginfollowinganinternetcampaignbritishprimeministergordonbrownmadeanofficialpublicapologyonbehalfofthebritishgovernmentfortheappallingwayhewastreatedqueenelizabethiigrantedhimaposthumouspardonin");
+    double originalFitness = c.gramFitness();
+    size_t count = c.englishTrigramCount();
+    c.shiftBy(5);
+    cout << "Original Fitness: " << originalFitness << " English Trigram Count: " << count << endl;
+    MonoSubstitutionSolver g(c);
+
+    string k = g.HillClimb();
+    cout << k << endl;
+    c.substitute(k);
+    cout << c << endl;
+    cout << (int)c.bestChiSqShift() << endl;
+}
