@@ -16,7 +16,15 @@ struct {
     }
 } descendingByCount;
 
-string MonoSubstitutionSolver::hillClimb() const {
+
+struct {
+    bool operator()(const tuple<int, int, size_t>& a, const tuple<int, int, size_t> &b){
+        return get<2>(a) > get<2>(b);
+    }
+} descendingByTrigramCount;
+
+
+bool MonoSubstitutionSolver::hillClimb(string &bestSolution) const {
     static const string symbols("abcdefghijklmnopqrstuvwxyz");
 
     std::uniform_int_distribution<> unif(0,25);
@@ -51,7 +59,7 @@ string MonoSubstitutionSolver::hillClimb() const {
             cout << "New Best Score: " << newScore << " With Key: " << key << endl;
             bestKey = key;
             minScore = newScore;
-            for(int j = 0; j < 1000; ++j){
+            for(int j = 0; j < 10000; ++j){
                 int a = unif(re);
                 int b = unif(re);
 
@@ -73,8 +81,10 @@ string MonoSubstitutionSolver::hillClimb() const {
         ++generation;
     }
 
-    return bestKey;
+    bestSolution = bestKey;
+    return true;
 }
+
 
 string MonoSubstitutionSolver::frequencySubstitute() const {
     auto counts = cipherText.countLetters();
@@ -84,10 +94,6 @@ string MonoSubstitutionSolver::frequencySubstitute() const {
     set<char> charset = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
     map<char, char> keymap;
 
-//    vector<char> topLetters;
-//    for(auto i = counts.begin(); i != counts.end(); ++i){
-//        topLetters.push_back(i->first);
-//    }
 
     int i = 0;
     for(auto c = counts.begin(); c != counts.end(); ++c, ++i){
@@ -112,7 +118,8 @@ string MonoSubstitutionSolver::frequencySubstitute() const {
     return key;
 }
 
-vector<AffineSolution> MonoSubstitutionSolver::affine() const {
+
+bool MonoSubstitutionSolver::affine(int &multiplier, int &shift) const {
     auto counts = cipherText.countLetters();
     sort(counts.begin(), counts.end(), descendingByCount);
 
@@ -120,7 +127,7 @@ vector<AffineSolution> MonoSubstitutionSolver::affine() const {
     int c2 = (++counts.begin())->first - 'a';
     int cDiff = c1 - c2;
 
-    vector<AffineSolution> solutions;
+    vector<tuple<int, int, size_t>> solutions;
     for(auto i = frequentLetters.begin(); i != frequentLetters.end(); i++){
         for(auto j = frequentLetters.begin(); j != frequentLetters.end(); j++){
 
@@ -158,10 +165,41 @@ vector<AffineSolution> MonoSubstitutionSolver::affine() const {
 
                 //if more than 20% of trigrams match english trigrams consider solved
                 size_t tcount = p.englishTrigramCount();
-                double chi = p.chiSqUnigram();
-                solutions.push_back(AffineSolution(aInv, -b, tcount, chi));
+                solutions.push_back(make_tuple(aInv, -b, tcount));
             }
         }
     }
-    return solutions;
+
+    if(solutions.empty()){
+        return false;
+    }
+
+    sort(solutions.begin(), solutions.end(), descendingByTrigramCount);
+    multiplier = get<0>(*solutions.begin());
+    shift = get<1>(*solutions.begin());
+    return true;
+}
+
+
+bool MonoSubstitutionSolver::shift(int &bestSolution) const {
+
+    vector<pair<int, size_t>> solutions;
+
+    for(size_t i = 0; i < 26; ++i){
+        Text p = cipherText;
+        p.shiftBy(i);
+        size_t count = p.englishTrigramCount();
+        solutions.push_back(pair<int, size_t>(i, count));
+    }
+
+    if(solutions.empty()){
+        return false;
+    }
+
+    sort(solutions.begin(), solutions.end(), [](const pair<int, size_t> &a, const pair<int, size_t> &b){
+        return a.second > b.second;
+    });
+
+    bestSolution = solutions.begin()->first;
+    return true;
 }

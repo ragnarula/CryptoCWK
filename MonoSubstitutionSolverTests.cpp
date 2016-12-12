@@ -23,9 +23,9 @@ TEST_CASE("Decrypt"){
     cout << "Original Fitness: " << originalFitness << " English Trigram Count: " << count << endl;
     MonoSubstitutionSolver g(c);
 
-    string k = g.hillClimb();
+    string k;
+    g.hillClimb(k);
     cout << k << endl;
     c.substitute(k);
     cout << c << endl;
-    cout << (int)c.bestChiSqShift() << endl;
 }

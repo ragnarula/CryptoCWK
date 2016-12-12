@@ -8,13 +8,11 @@
 #include <cstdlib>
 #include <algorithm>
 #include <cmath>
-#include <cfloat>
 #include "stats.h"
 #include "Text.h"
 
 
 using namespace std;
-
 
 Text::Text(const char* data) {
     for(auto i = data; *i != '\0'; ++i){
@@ -45,7 +43,8 @@ double Text::ic() const {
 		return 0.0;
 	}
 
-    map<char, size_t> freq = countLetters();
+    auto freq = countLetters();
+
 	//calculate numerator
 	int sum = 0;
 	for(auto i = freq.begin(); i != freq.end(); i++){
@@ -63,7 +62,7 @@ double Text::ic() const {
 }
 
 
-std::vector<Text> Text::groupTo(const int num) const {
+std::vector<Text> Text::groupTo(const size_t num) const {
 
     vector<Text> groups;
 
@@ -109,6 +108,7 @@ void Text::shiftBy(int n) {
     }
 }
 
+
 void Text::shiftBackwards() {
     shiftBy(-1);
 }
@@ -118,13 +118,13 @@ size_t Text::englishTrigramCount() const {
     size_t count = 0;
     for(auto t = trigramProbs.begin(); t !=  trigramProbs.end(); ++t){
 
-        count += countOccurancesOf(t->first);
+        count += countOccurrencesOf(t->first);
     }
     return count;
 }
 
 
-size_t Text::countOccurancesOf(const string &sub) const {
+size_t Text::countOccurrencesOf(const string &sub) const {
     size_t count = 0;
     for (size_t offset = content.find(sub); offset != string::npos; offset = content.find(sub, offset + sub.length()))
     {
@@ -193,79 +193,12 @@ vector<pair<char, size_t>> Text::countLetters() const {
         ++freq[c];
     }
     vector<pair<char, size_t>> counts(freq.size());
-    copy(freq.begin(), freq.end(), counts);
+    copy(freq.begin(), freq.end(), counts.begin());
     return counts;
 }
 
 
-struct LengthIC{
-    size_t length = 0;
-    double ic = 0;
-    bool operator>(const LengthIC& rhs) const {
-        double thisDev = fabs(ic - 0.0667);
-        double thatDev = fabs(rhs.ic - 0.0667);
-        return thisDev < thatDev;
-    }
-};
 
-
-VigenereSolutionSet Text::solveVigenere() const {
-
-    VigenereSolutionSet solutions;
-
-    set<LengthIC, std::greater<LengthIC>> ICSet;
-    for(size_t i = 1; i < 30; ++i){
-        vector<Text> cols = this->groupTo(i);
-        double sumIC = 0.0;
-        //take average of ic
-        for(auto c = cols.begin(); c != cols.end(); ++c){
-            sumIC += c->ic();
-        }
-        double averageIC = sumIC / i;
-        LengthIC l;
-        if(averageIC > 0.06){
-            l.ic = averageIC;
-            l.length = i;
-            ICSet.insert(l);
-        }
-    }
-
-    for(auto i = ICSet.begin(); i != ICSet.end(); ++i){
-        size_t keyLength = i->length;
-        std::string key;
-        key.insert(0, keyLength, 'a');
-
-        vector<Text> cols = this->groupTo(keyLength);
-        size_t k = 0;
-        for(auto i = cols.begin(); i != cols.end(); ++i, ++k){
-            char s = i->bestChiSqShift();
-            key.at(k) = key.at(k) + s;
-        }
-        Text p = *this;
-        p.vigenereAdd(key);
-        solutions.insert(VigenereSolution(key, p.englishTrigramCount()));
-    }
-
-
-    return solutions;
-}
-
-
-char Text::bestChiSqShift() const{
-    Text p = *this;
-    double minChiSq = p.chiSqUnigram();
-    int shift = 0;
-    for(int i = 1; i < 26; ++i){
-        p = *this;
-        p.shiftBy(i);
-        double c = p.chiSqUnigram();
-        if(c < minChiSq){
-            minChiSq = c;
-            shift = i;
-        }
-    }
-    return shift;
-}
 
 double Text::chiSqUnigram() const{
     auto counts = countLetters();
@@ -289,7 +222,7 @@ double Text::nGramDifference(const map<string, double> &probs) const{
 
     //count occurances of common ngrams
     for(auto b = probs.begin(); b != probs.end(); ++b){
-        size_t count = countOccurancesOf(b->first);
+        size_t count = countOccurrencesOf(b->first);
         sumActual += (double) count / (double) content.size();
         sumExpected += b->second * content.size();
     }
@@ -322,17 +255,6 @@ void Text::vigenereSubtract(const std::string &key) {
 }
 
 
-MonoSolutionSetByTrigrams Text::solveShift() const {
-    MonoSolutionSetByTrigrams solutions;
-    for(size_t i = 0; i < 26; ++i){
-        Text p = *this;
-        p.shiftBy(i);
-        size_t count = p.englishTrigramCount();
-        double chi = p.chiSqUnigram();
-        solutions.insert(AffineSolution(0, i, count, chi));
-    }
-    return solutions;
-}
 
 
 void Text::substitute(const std::string &key) {

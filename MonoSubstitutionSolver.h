@@ -16,8 +16,9 @@ public:
 
     MonoSubstitutionSolver(const Text& t) : cipherText(t){};
 
-    std::string hillClimb() const;
-    std::vector<AffineSolution> affine() const;
+    bool hillClimb(std::string &key) const;
+    bool affine(int &multiplier, int &shift) const;
+    bool shift(int &bestSolution) const;
 };
 
 
