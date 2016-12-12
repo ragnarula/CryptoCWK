@@ -123,27 +123,16 @@ TEST_CASE("Multiply does modulo multiplication of content"){
 }
 
 TEST_CASE("Vigenere add subtract"){
-//    std::string key("key");
-//
-//    Text t("thisandthat");
-//    t.vigenereAdd(key);
-//
-//    REQUIRE(t == Text("dlgcelnxfkx"));
-//
-//    t = Text("dlgcelnxfkx");
-//
-//    t.vigenereSubtract("key");
-//
-//    REQUIRE(t == Text("thisandthat"));
-}
+    std::string key("key");
 
-TEST_CASE("Solve Poly"){
-//    std::string key("keyw");
-//
-//    Text t("aaaathisthataaaawherethistherethataaaatoisthisthat");
-//    t.vigenereAdd(key);
-//
-//    VigenereSolutionSet s = t.solveVigenere();
-//
-//    REQUIRE(s.begin()->getKey() == "qwce");
+    Text t("thisandthat");
+    t.vigenereAdd(key);
+
+    REQUIRE(t == Text("dlgcelnxfkx"));
+
+    t = Text("dlgcelnxfkx");
+
+    t.vigenereSubtract("key");
+
+    REQUIRE(t == Text("thisandthat"));
 }

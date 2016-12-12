@@ -59,7 +59,7 @@ bool MonoSubstitutionSolver::hillClimb(string &bestSolution) const {
             cout << "New Best Score: " << newScore << " With Key: " << key << endl;
             bestKey = key;
             minScore = newScore;
-            for(int j = 0; j < 10000; ++j){
+            for(int j = 0; j < 1000; ++j){
                 int a = unif(re);
                 int b = unif(re);
 

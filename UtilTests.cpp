@@ -12,5 +12,6 @@ TEST_CASE("Extended Euclidean Tests"){
 
     int gcd = Util::gcdx(11, 26, &x, &y);
 
-    std::cout << "GCD: " << gcd << " X: " << x << " Y: " << y << std::endl;
+    REQUIRE(x == -7);
+    REQUIRE(y == 3);
 }

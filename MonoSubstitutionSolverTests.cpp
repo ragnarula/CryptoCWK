@@ -15,17 +15,39 @@ TEST_CASE("substitute test"){
 }
 
 
-TEST_CASE("Decrypt"){
-    Text c("alanmathisonturingobefrstjrjunejunewasanenglishcomputerscientistmathematicianlogiciancryptanalystandtheoreticalbiologisthewashighlyinfluentialinthedevelopmentoftheoreticalcomputerscienceprovidingaformalisationoftheconceptsofalgorithmandcomputationwiththeturingmachinewhichcanbeconsideredamodelofageneralpurposecomputerturingiswidelyconsideredtobethefatheroftheoreticalcomputerscienceandartificialintelligenceduringthesecondworldwarturingworkedforthegovernmentcodeandcypherschoolgccsatbletchleyparkbritainscodebreakingcentreforatimeheledhutthesectionresponsibleforgermannavalcryptanalysishedevisedanumberoftechniquesforspeedingthebreakingofgermanciphersincludingimprovementstotheprewarpolishbombemethodanelectromechanicalmachinethatcouldfindsettingsfortheenigmamachineturingplayedapivotalroleincrackinginterceptedcodedmessagesthatenabledthealliestodefeatthenazisinmanycrucialengagementsincludingthebattleoftheatlanticithasbeenestimatedthatthisworkshortenedthewarineuropebymorethantwoyearsandsavedoverfourteenmillionlivesafterthewarheworkedatthenationalphysicallaboratorywherehedesignedtheaceamongthefirstdesignsforastoredprogramcomputerinturingjoinedmaxnewmanscomputingmachinelaboratoryatthevictoriauniversityofmanchesterwherehehelpeddevelopthemanchestercomputersandbecameinterestedinmathematicalbiologyhewroteapaperonthechemicalbasisofmorphogenesisandpredictedoscillatingchemicalreactionssuchasthebelousovzhabotinskyreactionfirstobservedinthesturingwasprosecutedinforhomosexualactswhenitwasstillacriminalactintheukheacceptedtreatmentwithdeschemicalcastrationasanalternativetoprisonturingdiedindaysbeforehisndbirthdayfromcyanidepoisoninganinquestdeterminedhisdeathassuicidebutithasbeennotedthattheknownevidenceisequallyconsistentwithaccidentalpoisoninginfollowinganinternetcampaignbritishprimeministergordonbrownmadeanofficialpublicapologyonbehalfofthebritishgovernmentfortheappallingwayhewastreatedqueenelizabethiigrantedhimaposthumouspardonin");
+TEST_CASE("Hill climb for shift"){
+    cout << "Running Hill Climb test (might take a while)" << endl;
+    Text c("alanmathisonturingobefrstjrjunejunewasanenglishcomputerscientistmathematicianlogiciancryptanalystandtheoreticalbiologisthewashighlyinfluentialinthedevelopmentoftheoreticalcomputerscienceprovidingaformalisationoftheconceptsofalgorithmandcomputationwiththeturingmachinewhichcanbeconsideredamodelofageneralpurposecomputerturingiswidelyconsideredtobethefatheroftheoreticalcomputerscienceandartificialintelligenceduringthesecondworldwarturingworkedforthegovernmentcodeandcypherschoolgccsatbletchleyparkbritainscodebreakingcentreforatimeheledhutthesectionresponsibleforgermannaval");
     double originalFitness = c.nGramFitness();
-    size_t count = c.englishTrigramCount();
     c.shiftBy(5);
-    cout << "Original Fitness: " << originalFitness << " English Trigram Count: " << count << endl;
     MonoSubstitutionSolver g(c);
-
     string k;
     g.hillClimb(k);
-    cout << k << endl;
     c.substitute(k);
-    cout << c << endl;
+    REQUIRE(c.nGramFitness() - originalFitness < 0.01);
+}
+
+TEST_CASE("Hill Climb for affine"){
+    cout << "Running Hill Climb test (might take a while)" << endl;
+    Text c("alanmathisonturingobefrstjrjunejunewasanenglishcomputerscientistmathematicianlogiciancryptanalystandtheoreticalbiologisthewashighlyinfluentialinthedevelopmentoftheoreticalcomputerscienceprovidingaformalisationoftheconceptsofalgorithmandcomputationwiththeturingmachinewhichcanbeconsideredamodelofageneralpurposecomputerturingiswidelyconsideredtobethefatheroftheoreticalcomputerscienceandartificialintelligenceduringthesecondworldwarturingworkedforthegovernmentcodeandcypherschoolgccsatbletchleyparkbritainscodebreakingcentreforatimeheledhutthesectionresponsibleforgermannaval");
+    double originalFitness = c.nGramFitness();
+    c.shiftBy(5);
+    c.multiply(17);
+    MonoSubstitutionSolver g(c);
+    string k;
+    g.hillClimb(k);
+    c.substitute(k);
+    REQUIRE(c.nGramFitness() - originalFitness < 0.001);
+}
+
+TEST_CASE("Hill Climb for substitution"){
+    cout << "Running Hill Climb test (might take a while)" << endl;
+    Text c("alanmathisonturingobefrstjrjunejunewasanenglishcomputerscientistmathematicianlogiciancryptanalystandtheoreticalbiologisthewashighlyinfluentialinthedevelopmentoftheoreticalcomputerscienceprovidingaformalisationoftheconceptsofalgorithmandcomputationwiththeturingmachinewhichcanbeconsideredamodelofageneralpurposecomputerturingiswidelyconsideredtobethefatheroftheoreticalcomputerscienceandartificialintelligenceduringthesecondworldwarturingworkedforthegovernmentcodeandcypherschoolgccsatbletchleyparkbritainscodebreakingcentreforatimeheledhutthesectionresponsibleforgermannaval");
+    double originalFitness = c.nGramFitness();
+    c.substitute("zyxwvutsrqponmlkjihgfedcba");
+    MonoSubstitutionSolver g(c);
+    string k;
+    g.hillClimb(k);
+    c.substitute(k);
+    REQUIRE(c.nGramFitness() - originalFitness < 0.001);
 }

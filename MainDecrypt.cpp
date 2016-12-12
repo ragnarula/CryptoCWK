@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
         cout << "Key Found: " << key << endl;
         p.substitute(key);
         printStats(p, "Plain Text Stats");
-    }else if(strcmp(options[FUNCTION].arg, "vigenere") == 0 && options[OUTPUT] != NULL) {
+    } else if(strcmp(options[FUNCTION].arg, "vigenere") == 0 && options[OUTPUT] != NULL) {
         PolySubstitutionSolver ps(cipherText);
         string key;
         if(!ps.vigenere(key)){
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
         //write output
         std::ofstream output(options[OUTPUT].arg);
         cout << "Writing decrypted text to: " << options[OUTPUT].arg << endl;
-        output << cipherText << endl;
+        output << p << endl;
 
         if (output.fail()) {
             std::cerr << "Failed to write output to: " << options[OUTPUT].arg << std::endl;
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
 }
 
 void printStats(const Text &text, const string &header) {
-    static const string tab("\t");
+    static const string tab(" > ");
     cout << header << ":" << endl;
     cout << tab << "Number of charachters:          " << text.size() << endl;
     cout << tab << "Index of Coincidence:           " << text.ic() << endl;

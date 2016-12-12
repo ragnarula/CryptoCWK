@@ -9,7 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${dir}/bin")
 enable_testing()
 
 add_executable(decrypt MainDecrypt.cpp Text.cpp Util.cpp Util.h MonoSubstitutionSolver.cpp MonoSubstitutionSolver.h stats.h PolySubstitutionSolver.cpp PolySubstitutionSolver.h)
-add_executable(testapp MainTest.cpp Text.cpp TextTests.cpp Util.cpp Util.h UtilTests.cpp MonoSubstitutionSolver.cpp MonoSubstitutionSolver.h MonoSubstitutionSolverTests.cpp stats.h PolySubstitutionSolver.cpp PolySubstitutionSolver.h)
+add_executable(testapp MainTest.cpp Text.cpp TextTests.cpp Util.cpp Util.h UtilTests.cpp MonoSubstitutionSolver.cpp MonoSubstitutionSolver.h MonoSubstitutionSolverTests.cpp stats.h PolySubstitutionSolver.cpp PolySubstitutionSolver.h PolySubstitutionSolverTests.cpp)
 add_executable(shift Text.cpp MainShift.cpp Util.cpp)
 add_executable(affine MainAffine.cpp Util.cpp Text.cpp)
 add_executable(vigenere MainVigenere.cpp Util.cpp Text.cpp)
