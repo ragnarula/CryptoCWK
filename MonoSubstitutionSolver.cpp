@@ -5,12 +5,18 @@
 #include <random>
 #include <queue>
 #include "MonoSubstitutionSolver.h"
+#include "stats.h"
+#include "Util.h"
 
 using namespace std;
 
-const vector<char> frequentLetters = {'e','t','a','o','i','n','s','h','r','d','l','c','u','m','w','f','g','y','p','b','v','k','j','x','q','z'};
+struct {
+    bool operator()(const pair<char, size_t> &a, const pair<char, size_t> &b){
+        return a.second > b.second;
+    }
+} descendingByCount;
 
-string MonoSubstitutionSolver::HillClimb() {
+string MonoSubstitutionSolver::hillClimb() const {
     static const string symbols("abcdefghijklmnopqrstuvwxyz");
 
     std::uniform_int_distribution<> unif(0,25);
@@ -39,7 +45,7 @@ string MonoSubstitutionSolver::HillClimb() {
         Text p = cipherText;
         p.substitute(key);
 
-        double newScore = p.gramFitness();
+        double newScore = p.nGramFitness();
 
         if(newScore < minScore){
             cout << "New Best Score: " << newScore << " With Key: " << key << endl;
@@ -70,21 +76,23 @@ string MonoSubstitutionSolver::HillClimb() {
     return bestKey;
 }
 
-string MonoSubstitutionSolver::frequencySubstitute(){
-    auto counts = cipherText.getLetterFrequencies();
+string MonoSubstitutionSolver::frequencySubstitute() const {
+    auto counts = cipherText.countLetters();
+    sort(counts.begin(), counts.end(), descendingByCount);
+
     string key("abcdefghijklmnopqrstuvwxyz");
     set<char> charset = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
     map<char, char> keymap;
 
-    vector<char> topLetters;
-    for(auto i = counts.begin(); i != counts.end(); ++i){
-        topLetters.push_back(i->letter);
-    }
+//    vector<char> topLetters;
+//    for(auto i = counts.begin(); i != counts.end(); ++i){
+//        topLetters.push_back(i->first);
+//    }
 
     int i = 0;
-    for(auto c = topLetters.begin(); c != topLetters.end(); ++c, ++i){
+    for(auto c = counts.begin(); c != counts.end(); ++c, ++i){
         char x = frequentLetters[i];
-        char y = *c;
+        char y = c->first;
         keymap[y] = x;
         charset.erase(x);
     }
@@ -102,4 +110,58 @@ string MonoSubstitutionSolver::frequencySubstitute(){
         }
     }
     return key;
+}
+
+vector<AffineSolution> MonoSubstitutionSolver::affine() const {
+    auto counts = cipherText.countLetters();
+    sort(counts.begin(), counts.end(), descendingByCount);
+
+    int c1 = counts.begin()->first - 'a';
+    int c2 = (++counts.begin())->first - 'a';
+    int cDiff = c1 - c2;
+
+    vector<AffineSolution> solutions;
+    for(auto i = frequentLetters.begin(); i != frequentLetters.end(); i++){
+        for(auto j = frequentLetters.begin(); j != frequentLetters.end(); j++){
+
+            if(i == j){
+                continue;
+            }
+
+            //Solve two linear congruences
+            // Ax + b = c mod 26
+            // A = (c1 - c2)(x1 - x1)^-1 mod 26
+            // where c1 and c2 are the two most frequent letters in cipher text
+            // and x1 and x2 are pairs of the most frequent letters in english
+
+            int x1 = *i - 'a';
+            int x2 = *j - 'a';
+            int xDiff = x1 - x2;
+            int xDiffInv = 0;
+            int y = 0;
+
+            int gcd = Util::gcdx(xDiff, 26, &xDiffInv, &y);
+
+            int A = (cDiff * xDiffInv) % 26;
+
+            int check = Util::gcd(A, 26);
+            if(check == 1){
+
+                int aInv = 0;
+                int yy = 0;
+
+                Util::gcdx(A, 26, &aInv, &yy);
+                int b = ((c1 - (A * x1)) % 26 + 26) % 26;
+                Text p = cipherText;
+                p.shiftBy(-b);
+                p.multiply(aInv);
+
+                //if more than 20% of trigrams match english trigrams consider solved
+                size_t tcount = p.englishTrigramCount();
+                double chi = p.chiSqUnigram();
+                solutions.push_back(AffineSolution(aInv, -b, tcount, chi));
+            }
+        }
+    }
+    return solutions;
 }

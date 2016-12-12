@@ -7,6 +7,9 @@
 
 #include <string>
 #include <map>
+#include <vector>
+
+const std::vector<char> frequentLetters = {'e','t','a','o','i','n','s','h','r','d','l','c','u','m','w','f','g','y','p','b','v','k','j','x','q','z'};
 
 const std::map<std::string, double> unigramProbs = {
         {"e", 0.12702},
@@ -100,7 +103,7 @@ const std::map<std::string, double> trigramProbs = {
         {"res",0.0021},
         {"int",0.0032},
         {"eth",0.0024},
-        {"ont",0.0020},
+        {"ont",0.0020}
 };
 
 const std::map<std::string, double> quadgramProbs = {

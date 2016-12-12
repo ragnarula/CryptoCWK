@@ -8,14 +8,14 @@
 
 #include <cstddef>
 
-class LetterFrequency {
+class LetterCount {
 public:
     char letter;
     size_t count;
 
-    bool operator>(const LetterFrequency& other) const;
+    bool operator<(const LetterCount& other) const;
 
-    LetterFrequency(char letter, size_t count);
+    LetterCount(char letter, size_t count);
 };
 
 

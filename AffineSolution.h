@@ -8,17 +8,15 @@
 
 #include <cstddef>
 
-class MonoSolution {
+class AffineSolution {
     int multiplier;
     int shift;
     size_t trigramCount;
     double chi;
 
 public:
-    MonoSolution() : multiplier(0), shift(0), trigramCount(0), chi(0.0){};
-    MonoSolution(int multiplier, int shift, size_t trigramCount, double chi);
-    bool operator>(const MonoSolution& other) const;
-    bool operator<(const MonoSolution& other) const;
+    AffineSolution() : multiplier(0), shift(0), trigramCount(0), chi(0.0){};
+    AffineSolution(int multiplier, int shift, size_t trigramCount, double chi);
     int getMultiplier() const;
     int getShift() const;
     size_t getTrigramCount() const;

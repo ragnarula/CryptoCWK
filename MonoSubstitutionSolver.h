@@ -11,11 +11,13 @@
 class MonoSubstitutionSolver {
 
     const Text cipherText;
+    std::string frequencySubstitute() const;
 public:
-    MonoSubstitutionSolver(const Text& t) : cipherText(t){};
-    std::string HillClimb();
 
-    std::string frequencySubstitute();
+    MonoSubstitutionSolver(const Text& t) : cipherText(t){};
+
+    std::string hillClimb() const;
+    std::vector<AffineSolution> affine() const;
 };
 
 
