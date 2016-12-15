@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <cmath>
+#include <random>
 #include "stats.h"
 #include "Text.h"
 
@@ -282,4 +283,18 @@ double Text::nGramFitness() const{
     double triGramScore = nGramDifference(trigramProbs);
     double quadGramScore = nGramDifference(quadgramProbs);
     return uniGramScore + (biGramScore) + (triGramScore) + (quadGramScore);
+}
+
+bool Text::sample(Text &out, size_t num) const {
+    if(num > content.size()) return false;
+    std::uniform_int_distribution<unsigned long> unif(0, content.size() - num);
+    std::default_random_engine re(time(0));
+    size_t start = unif(re);
+    string samp = content.substr(start, num);
+    out = Text(samp);
+    return true;
+}
+
+const std::string &Text::getString() const {
+    return content;
 }

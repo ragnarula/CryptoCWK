@@ -136,3 +136,10 @@ TEST_CASE("Vigenere add subtract"){
 
     REQUIRE(t == Text("thisandthat"));
 }
+
+TEST_CASE("substitute test"){
+    Text a("abcdefghijklmnopqrstuvwxyz");
+    a.substitute("zyxwvutsrqponmlkjihgfedcba");
+    REQUIRE(a == Text("zyxwvutsrqponmlkjihgfedcba"));
+
+}

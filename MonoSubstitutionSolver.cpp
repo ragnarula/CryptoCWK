@@ -24,7 +24,7 @@ struct {
 } descendingByTrigramCount;
 
 
-bool MonoSubstitutionSolver::hillClimb(string &bestSolution) const {
+bool MonoSubstitutionSolver::hillClimb(string &bestSolution, size_t& gen, ostream& log) const {
     static const string symbols("abcdefghijklmnopqrstuvwxyz");
 
     std::uniform_int_distribution<> unif(0,25);
@@ -46,7 +46,7 @@ bool MonoSubstitutionSolver::hillClimb(string &bestSolution) const {
         }
     }
 
-    int generation = 0;
+    size_t generation = 0;
     while(!keyQueue.empty()){
         string &key = keyQueue.front();
 
@@ -56,7 +56,7 @@ bool MonoSubstitutionSolver::hillClimb(string &bestSolution) const {
         double newScore = p.nGramFitness();
 
         if(newScore < minScore){
-            cout << "New Best Score: " << newScore << " With Key: " << key << endl;
+            log << "New Best Score: " << newScore << " With Key: " << key << endl;
             bestKey = key;
             minScore = newScore;
             for(int j = 0; j < 1000; ++j){
@@ -76,12 +76,12 @@ bool MonoSubstitutionSolver::hillClimb(string &bestSolution) const {
         }
         processedKeys.insert(key);
 
-        cout << generation << '\r';
         keyQueue.pop();
         ++generation;
     }
 
     bestSolution = bestKey;
+    gen = generation;
     return true;
 }
 
@@ -202,4 +202,13 @@ bool MonoSubstitutionSolver::shift(int &bestSolution) const {
 
     bestSolution = solutions.begin()->first;
     return true;
+}
+
+bool MonoSubstitutionSolver::hillClimb(std::string &key) const {
+    return hillClimb(key, cout);
+}
+
+bool MonoSubstitutionSolver::hillClimb(std::string &bestSolution, std::ostream &log) const {
+    size_t gen = 0;
+    return hillClimb(bestSolution, gen, log);
 }

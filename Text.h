@@ -23,6 +23,7 @@ public:
 	Text(const char *);
     Text(std::string&);
     virtual ~Text();
+    bool sample(Text& out, size_t num) const;
 
     std::vector<Text> groupTo(const size_t) const;
     std::vector<std::pair<char, size_t>> countLetters() const;
@@ -31,6 +32,7 @@ public:
     size_t countOccurrencesOf(const std::string &sub) const;
 
     unsigned long size() const;
+	const std::string& getString() const;
 
     double ic() const;
     double chiSqUnigram() const;

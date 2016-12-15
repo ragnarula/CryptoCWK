@@ -1,1 +1,1 @@
-# CryptoCWK
+# Cryptography Coursework
